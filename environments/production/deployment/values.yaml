@@ -12,5 +12,6 @@ apps:
 
   - name: production-postgresql
     path: charts/postgresql
+    namespace: postgres
     valueFiles:
       - ../../environments/production/postgresql/values.yaml
