@@ -1,0 +1,11 @@
+project: production
+server: https://kubernetes.default.svc
+repoURL: https://github.com/akxr-in/akxr-gitops
+targetRevision: HEAD
+namespace: default
+
+apps:
+  - name: example
+    path: charts/production
+    valueFiles:
+      - ../../environments/production/example/values.yaml

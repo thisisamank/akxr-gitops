@@ -1,0 +1,7 @@
+project: default
+repoURL: https://github.com/akxr-in/akxr-gitops
+targetRevision: HEAD
+server: https://kubernetes.default.svc
+namespace: default
+
+apps: []  # Populated by environment values
