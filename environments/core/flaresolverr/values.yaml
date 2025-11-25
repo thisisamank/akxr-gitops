@@ -1,0 +1,50 @@
+
+image:
+  repository: ghcr.io/flaresolverr/flaresolverr
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8191
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: flaresolverr.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - flaresolverr.pixr.in
+
+resources:
+  limits:
+    memory: 1000Mi
+  requests:
+    cpu: 100m
+    memory: 500Mi
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  httpGet:
+    path: /
+    port: 8191
+
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  httpGet:
+    path: /
+    port: 8191
+
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

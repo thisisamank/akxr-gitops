@@ -1,0 +1,82 @@
+  # prowlarr:
+  #   image: lscr.io/linuxserver/prowlarr:latest
+  #   container_name: prowlarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ./prowlarr:/config
+  #   restart: unless-stopped
+  #   depends_on:
+  #     gluetun:
+  #       condition: service_healthy
+  #       restart: true
+  #   network_mode: service:gluetun
+
+
+
+image:
+  repository: lscr.io/linuxserver/prowlarr
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 9696
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: prowlarr.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - prowlarr.pixr.in
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1024Mi
+
+# FileBrowser does not require custom probes by default
+livenessProbe: null
+readinessProbe: null
+
+# Pod labels and annotations
+podLabels:
+  app: prowlarr
+  version: v1
+
+podAnnotations:
+  description: "Prowlarr"
+
+volumes:
+  - name: prowlarr-root
+    hostPath:
+      path: /home/thisisamank/prowlarr
+      type: Directory
+  - name: prowlarr-data
+    hostPath:
+      path: /home/thisisamank/data
+      type: Directory
+
+volumeMounts:
+  - name: prowlarr-root
+    mountPath: /config
+  - name: prowlarr-data
+    mountPath: /data
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000

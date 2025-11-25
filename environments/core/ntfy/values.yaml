@@ -1,0 +1,56 @@
+image:
+  repository: binwiederhier/ntfy
+  tag: "latest"
+  pullPolicy: Always
+args: ["serve"]
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+  hosts:
+    - host: ntfy.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - ntfy.pixr.in
+volumes:
+  - name: ntfy-config
+    configMap:
+      name: ntfy
+
+volumeMounts:
+  - name: ntfy-config
+    mountPath: "/etc/ntfy"
+
+
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+# FileBrowser does not require custom probes by default
+livenessProbe: null
+readinessProbe: null
+
+# Pod labels and annotations
+podLabels:
+  app: ntfy
+  version: v1
+
+podAnnotations:
+  description: "ntfy"
+  container.apparmor.security.beta.kubernetes.io/app: unconfined

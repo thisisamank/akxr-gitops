@@ -1,0 +1,82 @@
+#  sonarr:
+#     image: lscr.io/linuxserver/sonarr:latest
+#     container_name: sonarr
+#     restart: unless-stopped
+#     environment:
+#       - PUID=${PUID}
+#       - PGID=${PGID}
+#       - TZ=${TZ}
+#     volumes:
+#       - /etc/localtime:/etc/localtime:ro
+#       - ./sonarr:/config
+#       - /data:/data
+#     ports:
+#       - 8989:8989
+#     networks:
+#       servarrnetwork:
+#         ipv4_address: 172.39.0.3
+
+image:
+  repository: lscr.io/linuxserver/sonarr
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8989
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: sonarr.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - sonarr.pixr.in
+  tls: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 1024Mi
+
+# FileBrowser does not require custom probes by default
+livenessProbe: null
+readinessProbe: null
+
+# Pod labels and annotations
+podLabels:
+  app: sonarr
+  version: v1
+
+podAnnotations:
+  description: "Sonarr"
+
+volumes:
+  - name: sonarr-root
+    hostPath:
+      path: /home/thisisamank/sonarr
+      type: Directory
+  - name: sonarr-data
+    hostPath:
+      path: /home/thisisamank/data
+      type: Directory
+
+volumeMounts:
+  - name: sonarr-root
+    mountPath: /config
+  - name: sonarr-data
+    mountPath: /data
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000

@@ -9,3 +9,32 @@ apps:
     path: charts/core
     valueFiles:
       - ../../environments/core/jellyfin/values.yaml
+
+  - name: flaresolverr
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/flaresolverr/values.yaml
+  - name: jellyseerr
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/jellyseerr/values.yaml
+
+  - name: ntfy
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/ntfy/values.yaml
+
+  - name: prowlarr
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/prowlarr/values.yaml
+
+  - name: radarr
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/radarr/values.yaml
+
+  - name: sonarr
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/sonarr/values.yaml

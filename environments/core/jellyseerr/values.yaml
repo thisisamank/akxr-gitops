@@ -1,0 +1,77 @@
+
+  # jellyseerr:
+  #   container_name: jellyseerr
+  #   image: fallenbagel/jellyseerr:latest
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/Los_Angeles
+  #   volumes:
+  #     - ./jellyseerr:/app/config
+  #   ports:
+  #     - 5055:5055
+  #   restart: unless-stopped
+
+image:
+  repository: fallenbagel/jellyseerr
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 5055
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+  hosts:
+    - host: tv2.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - tv2.pixr.in
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 250m
+    memory: 512Mi
+
+# FileBrowser does not require custom probes by default
+livenessProbe: null
+readinessProbe: null
+
+# Pod labels and annotations
+podLabels:
+  app: jellyseerr
+  version: v1
+
+podAnnotations:
+  description: "Jellyseerr"
+  container.apparmor.security.beta.kubernetes.io/app: unconfined
+
+volumes:
+  - name: jellyseerr-config
+    hostPath:
+      path: /home/thisisamank/jellyseerr
+      type: Directory
+
+
+volumeMounts:
+  - name: jellyseerr-config
+    mountPath: /app/config
+
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000

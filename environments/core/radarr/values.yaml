@@ -1,0 +1,82 @@
+  # radarr:
+  #   image: lscr.io/linuxserver/radarr:latest
+  #   container_name: radarr
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ./radarr:/config
+  #     - /data:/data
+  #   ports:
+  #     - 7878:7878
+  #   networks:
+  #     servarrnetwork:
+  #       ipv4_address: 172.39.0.4
+
+
+image:
+  repository: lscr.io/linuxserver/radarr
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 7878
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: radarr.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - radarr.pixr.in
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 512Mi
+
+# FileBrowser does not require custom probes by default
+livenessProbe: null
+readinessProbe: null
+
+# Pod labels and annotations
+podLabels:
+  app: radarr
+  version: v1
+
+podAnnotations:
+  description: "Radarr"
+
+volumes:
+  - name: radarr-root
+    hostPath:
+      path: /home/thisisamank/radarr
+      type: Directory
+  - name: radarr-data
+    hostPath:
+      path: /home/thisisamank/data
+      type: Directory
+
+volumeMounts:
+  - name: radarr-root
+    mountPath: /config
+  - name: radarr-data
+    mountPath: /data
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
