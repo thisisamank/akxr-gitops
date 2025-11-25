@@ -1,0 +1,104 @@
+# Jellyfin Application Configuration
+
+image:
+  repository: docker.io/jellyfin/jellyfin
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8096
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: tv.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - tv.pixr.in
+
+resources:
+  limits:
+    memory: 1024Mi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  httpGet:
+    path: /
+    port: 8096
+
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  httpGet:
+    path: /
+    port: 8096
+
+persistence:
+  config:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: ""
+  # media:
+  #   enabled: true
+  #   type: hostPath
+  #   hostPath: /home/thisisamank
+  #   accessMode: ReadWriteOnce
+
+volumes:
+  - name: jellyfin-root
+    hostPath:
+      path: /home/thisisamank/jellyfin
+      type: Directory
+  - name: jellyfin-data
+    hostPath:
+      path: /home/thisisamank/data
+      type: Directory
+
+volumeMounts:
+  - name: jellyfin-root
+    mountPath: /config
+  - name: jellyfin-data
+    mountPath: /data
+
+# Init container to increase inotify limits
+initContainers:
+  - name: sysctl
+    image: busybox:latest
+    command:
+      - sh
+      - -c
+      - |
+        # Increase inotify instance limit (default is 128)
+        echo 524288 > /proc/sys/fs/inotify/max_user_instances || true
+        # Increase inotify watches limit (default is 8192)
+        echo 524288 > /proc/sys/fs/inotify/max_user_watches || true
+    securityContext:
+      privileged: true
+
+# Security context for the pod (may be needed for init container)
+podSecurityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  fsGroup: 0
+
+# Environment variables to potentially reduce file watching
+env:
+  - name: DOTNET_SYSTEM_IO_FILESYSTEMWATCHER_MAXWATCHES
+    value: "524288"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

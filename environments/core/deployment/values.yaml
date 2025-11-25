@@ -1,0 +1,11 @@
+project: nexus
+server: https://kubernetes.default.svc
+repoURL: https://github.com/thisisamank/akxr-gitops
+targetRevision: HEAD
+namespace: default
+
+apps:
+  - name: jellyfin
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/jellyfin/values.yaml
