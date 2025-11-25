@@ -24,7 +24,7 @@ metadata:
 spec:
   project: staging
   source:
-    repoURL: https://github.com/akxr-in/akxr-gitops
+    repoURL: https://github.com/thisisamank/akxr-gitops
     targetRevision: HEAD
     path: charts/deployment
     helm:

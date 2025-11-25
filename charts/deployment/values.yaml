@@ -1,5 +1,5 @@
 project: default
-repoURL: https://github.com/akxr-in/akxr-gitops
+repoURL: https://github.com/thisisamank/akxr-gitops
 targetRevision: HEAD
 server: https://kubernetes.default.svc
 namespace: default
