@@ -10,7 +10,7 @@ apps:
     valueFiles:
       - ../../environments/production/speedtest/values.yaml
 
-  - name: postgresql
+  - name: production-postgresql
     path: charts/postgresql
     valueFiles:
       - ../../environments/production/postgresql/values.yaml

@@ -1,0 +1,80 @@
+# PostgreSQL Production Configuration
+
+# Authentication - using existing sealed secret
+auth:
+  enablePostgresUser: true
+  existingSecret: postgresql-staging-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+    replicationPasswordKey: replication-password
+  # Custom database and user
+  username: "akxr"
+  database: "akxr-staging"
+  # Replication user
+  replicationUsername: repl_user
+
+# Architecture - standalone for production
+architecture: standalone
+
+# Image configuration
+image:
+  registry: docker.io
+  repository: bitnami/postgresql
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Primary PostgreSQL configuration
+primary:
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    mountPath: /bitnami/postgresql
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      postgresql: 5432
+
+  # Network policy
+  networkPolicy:
+    enabled: true
+    allowExternal: false
+    allowExternalEgress: true
+
+  # Pod disruption budget
+  pdb:
+    create: true
+    minAvailable: 1
+
+# Metrics and monitoring (optional)
+metrics:
+  enabled: false
+
+# Read replicas (disabled for standalone)
+readReplicas:
+  replicaCount: 0
+
+nodeSelector:
+  node-type: staging
+
+tolerations:
+  - key: node-type
+    operator: Equal
+    value: staging
+    effect: NoSchedule
+
