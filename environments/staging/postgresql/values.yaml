@@ -61,6 +61,17 @@ primary:
     create: true
     minAvailable: 1
 
+  # Node selector for staging nodes
+  nodeSelector:
+    node-type: staging
+
+  # Tolerations for staging node taints
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: staging
+      effect: NoSchedule
+
 # Metrics and monitoring (optional)
 metrics:
   enabled: false
@@ -69,12 +80,4 @@ metrics:
 readReplicas:
   replicaCount: 0
 
-nodeSelector:
-  node-type: staging
-
-tolerations:
-  - key: node-type
-    operator: Equal
-    value: staging
-    effect: NoSchedule
 

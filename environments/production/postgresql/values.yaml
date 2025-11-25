@@ -61,6 +61,17 @@ primary:
     create: true
     minAvailable: 1
 
+  # Node selector for production nodes
+  nodeSelector:
+    node-type: prod
+
+  # Tolerations for production node taints
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: prod
+      effect: NoSchedule
+
 # Metrics and monitoring (optional)
 metrics:
   enabled: false
@@ -68,13 +79,4 @@ metrics:
 # Read replicas (disabled for standalone)
 readReplicas:
   replicaCount: 0
-
-nodeSelector:
-  node-type: prod
-
-tolerations:
-  - key: node-type
-    operator: Equal
-    value: prod
-    effect: NoSchedule
 
