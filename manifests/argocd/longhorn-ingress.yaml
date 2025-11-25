@@ -1,0 +1,41 @@
+
+---
+# Basic authentication middleware
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-basic-auth
+  namespace: longhorn-system
+spec:
+  basicAuth:
+    secret: basic-auth
+---
+# Buffering middleware for large file uploads (10000m = 10GB)
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-buffering
+  namespace: longhorn-system
+spec:
+  buffering:
+    maxRequestBodyBytes: 10485760000  # 10000m in bytes
+    maxResponseBodyBytes: 10485760000
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: longhorn-ingress
+  namespace: longhorn-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`longhorn.pixr.in`)
+      middlewares:
+        - name: longhorn-basic-auth
+        - name: longhorn-buffering
+      services:
+        - kind: Service
+          name: longhorn-frontend
+          port: 80

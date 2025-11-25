@@ -1,0 +1,26 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nexus-tls-prod
+  namespace: default
+spec:
+  secretName: nexus-tls-prod
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - 'files.pixr.in'
+  - 'tv.pixr.in'
+  - 'radarr.pixr.in'
+  - 'sonarr.pixr.in'
+  - 'nzb.pixr.in'
+  - 'prowlarr.pixr.in'
+  - 'jellyfin.pixr.in'
+  - 'tv2.pixr.in'
+  - 'qb.pixr.in'
+  - 'ntfy.pixr.in'
+  - 'auth.pixr.in'
+  - 'registry.pixr.in'
+  - 'longhorn.pixr.in'
+  - 'speedtest.pixr.in'

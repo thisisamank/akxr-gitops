@@ -1,0 +1,11 @@
+# allow-egress-internet.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-internet
+  namespace: default
+spec:
+  podSelector: {}          # all pods in default
+  policyTypes: [Egress]
+  egress:
+    - {}                   # allow all egress
