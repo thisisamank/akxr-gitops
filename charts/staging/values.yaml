@@ -33,10 +33,14 @@ serviceAccount:
 
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
+podAnnotations: {
+  description: "Apps are being deployed to staging"
+}
 # This is for setting Kubernetes Labels to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
+podLabels: {
+  app: staging
+}
 
 podSecurityContext: {}
   # fsGroup: 2000
