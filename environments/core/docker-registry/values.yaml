@@ -1,0 +1,96 @@
+image:
+  repository: registry
+  tag: "2.8.2"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: registry.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - registry.pixr.in
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+# Pod labels and annotations
+podLabels:
+  app: docker-registry
+  version: v1
+
+podAnnotations:
+  description: "Self-hosted Docker registry"
+
+# Environment variables for Docker registry
+env:
+  - name: REGISTRY_AUTH
+    value: htpasswd
+  - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+    value: /var/lib/registry
+  - name: REGISTRY_STORAGE_DELETE_ENABLED
+    value: "true"
+  - name: REGISTRY_HTTP_HOST
+    value: https://registry.pixr.in
+  - name: REGISTRY_AUTH_HTPASSWD_REALM
+    value: "Registry Realm"
+  - name: REGISTRY_AUTH_HTPASSWD_PATH
+    value: /auth/htpasswd
+  # - name: REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR
+  #   value: inmemory
+
+volumes:
+  - name: registry-data
+    hostPath:
+      path: /home/thisisamank/registry
+      type: Directory
+  - name: registry-auth
+    secret:
+      secretName: docker-registry-auth
+      items:
+        - key: htpasswd
+          path: htpasswd
+
+volumeMounts:
+  - name: registry-data
+    mountPath: /var/lib/registry
+  - name: registry-auth
+    mountPath: /auth
+    readOnly: true
+
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  fsGroup: 0
+
+# Health checks (use TCP to avoid HTTP 401 when auth is enabled)
+livenessProbe: null
+  # tcpSocket:
+  #   port: 5000
+  # initialDelaySeconds: 30
+  # periodSeconds: 10
+  # timeoutSeconds: 5
+  # failureThreshold: 3
+
+readinessProbe: null
+  # tcpSocket:
+  #   port: 5000
+  # initialDelaySeconds: 5
+  # periodSeconds: 5
+  # timeoutSeconds: 3
+  # failureThreshold: 3
