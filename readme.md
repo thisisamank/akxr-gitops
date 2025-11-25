@@ -1,4 +1,4 @@
-# Nexus GitOps
+# akxr GitOps
 
 A GitOps-managed homelab infrastructure using ArgoCD and Helm charts for deploying media server applications on Kubernetes.
 
@@ -14,6 +14,39 @@ This repository contains the GitOps configuration for a personal homelab setup, 
 - **Sealed Secrets**: Encrypted secrets management
 - **Let's Encrypt**: Automated SSL certificate provisioning
 
+## Repository Structure
+
+```
+akxr-gitops/
+├── charts/
+│   ├── core/              # Base Helm chart for applications
+│   ├── deployment/        # Chart that generates ArgoCD Application resources
+│   ├── production/        # Production-specific chart templates
+│   └── staging/           # Staging-specific chart templates
+├── environments/
+│   ├── core/              # Core/production applications
+│   │   ├── deployment/    # App list for core environment
+│   │   ├── jellyfin/
+│   │   ├── sonarr/
+│   │   └── ...
+│   ├── production/        # Production-specific apps
+│   └── staging/           # Staging apps
+├── manifests/
+│   ├── core.yaml          # Root ArgoCD Application for core environment
+│   ├── production.yaml     # Root ArgoCD Application for production
+│   ├── staging.yaml        # Root ArgoCD Application for staging
+│   └── argocd/            # ArgoCD configuration (certificates, ingress, etc.)
+└── secrets/               # Encrypted secrets management
+```
+
+### How It Works
+
+1. **Root Applications** (`manifests/*.yaml`): Bootstrap ArgoCD Applications that point to the `charts/deployment` chart
+2. **Deployment Chart** (`charts/deployment/`): Generates ArgoCD Application resources for each app defined in environment values
+3. **Environment Values** (`environments/{env}/deployment/values.yaml`): Lists all apps for an environment with their chart paths and value files
+4. **App Values** (`environments/{env}/{app}/values.yaml`): Application-specific configuration
+5. **Core Chart** (`charts/core/`): Base Helm chart that renders Kubernetes resources (Deployment, Service, Ingress, etc.)
+
 ## Applications
 
 The following applications are managed through this GitOps setup:
@@ -25,7 +58,8 @@ The following applications are managed through this GitOps setup:
 - **Prowlarr**: Indexer manager for Sonarr and Radarr
 - **qBittorrent**: BitTorrent client
 - **FlareSolverr**: Proxy for bypassing Cloudflare protection
-- **FileBrowser**: Web-based file manager
+- **ntfy**: Push notifications server
+- **Docker Registry**: Private container registry
 
 ## Prerequisites
 
@@ -36,34 +70,52 @@ The following applications are managed through this GitOps setup:
 
 ## Getting Started
 
-This repo is also being used by Students in WAGMI. You can deploy your apps by following these steps
+This repo is also being used by Students in WAGMI. You can deploy your apps by following these steps:
 
 ### 1. Fork the Repository
 
 ```bash
-git clone https://github.com/your-username/nexus-gitops.git
-cd nexus-gitops
+git clone https://github.com/your-username/akxr-gitops.git
+cd akxr-gitops
 ```
 
-### 2. Dockerize your service
+### 2. Dockerize Your Service
 
-You will have to dockerize your service and push it dockerhub or other public repository.
+You will have to dockerize your service and push it to DockerHub or another public repository.
 
 ### 3. Configure Secrets
 
 Follow the instructions in `secrets/readme.md` to set up encrypted secrets for your applications.
 
-### 4. Customize Applications
+### 4. Add Your Application
 
-Edit the values files in the `apps/` directory to customize application configurations:
+To add a new application to an environment:
 
-- Update Container image and tag you created in step-2
-- Update ingress hosts to match your domain
-- Configure resource limits and requests
-- Set up persistent volumes for data storage
-- Adjust environment-specific settings
+1. **Create application values file**:
+   ```bash
+   mkdir -p environments/{core|production|staging}/your-app
+   cp environments/staging/example/values.yaml environments/{core|production|staging}/your-app/values.yaml
+   ```
 
-## Domain Configuration
+2. **Configure your application** in `environments/{env}/your-app/values.yaml`:
+   - Update container image and tag (from step 2)
+   - Update ingress hosts to match your domain
+   - Configure resource limits and requests
+   - Set up persistent volumes for data storage
+   - Adjust environment-specific settings
+
+3. **Register the app** in `environments/{env}/deployment/values.yaml`:
+   ```yaml
+   apps:
+     - name: your-app
+       path: charts/core
+       valueFiles:
+         - ../../environments/{env}/your-app/values.yaml
+   ```
+
+4. **Commit and push** - ArgoCD will automatically sync the changes
+
+### 5. Domain Configuration
 
 Applications are configured to use the `pixr.in` domain with subdomains:
 - `tv.pixr.in` - Jellyfin
@@ -73,7 +125,7 @@ Applications are configured to use the `pixr.in` domain with subdomains:
 
 Update these domains in the respective `values.yaml` files to match your setup.
 
-also add your domain to the manifests/certificiate.yaml file so that certificate can be issued for your domain.
+Also add your domain to the `manifests/argocd/certificates.yaml` file so that certificates can be issued for your domain.
 
 ## Storage
 
@@ -82,6 +134,16 @@ The setup uses hostPath volumes for persistent storage:
 - Media data: `/mnt/hetzner/data/`
 
 Adjust these paths in the application values files to match your storage setup.
+
+## Environments
+
+The repository supports multiple environments:
+
+- **core**: Production media server applications
+- **production**: Production-specific applications
+- **staging**: Staging/test applications
+
+Each environment has its own ArgoCD Application manifest in `manifests/` and its own app configurations in `environments/`.
 
 ## Security
 
