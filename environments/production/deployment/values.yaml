@@ -5,7 +5,7 @@ targetRevision: HEAD
 namespace: default
 
 apps:
-  - name: example
+  - name: speedtest
     path: charts/production
     valueFiles:
-      - ../../environments/production/example/values.yaml
+      - ../../environments/production/speedtest/values.yaml
