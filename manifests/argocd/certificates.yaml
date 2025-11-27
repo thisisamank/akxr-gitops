@@ -24,3 +24,5 @@ spec:
   - 'registry.pixr.in'
   - 'longhorn.pixr.in'
   - 'speedtest.pixr.in'
+  - 'outline.pixr.in'
+  - 'data.outline.pixr.in'
