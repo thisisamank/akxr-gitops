@@ -1,0 +1,109 @@
+# Longhorn Configuration for Core Environment
+
+# Disable pre-upgrade checker for GitOps/ArgoCD installations
+preUpgradeChecker:
+  jobEnabled: false
+  upgradeVersionCheck: true
+
+# Default settings
+defaultSettings:
+  # Allow uninstallation (set to empty or specific value to allow deletion)
+  deletingConfirmationFlag: ""
+  # Default number of replicas
+  defaultReplicaCount: "3"
+  # Default data path on nodes
+  defaultDataPath: "/var/lib/longhorn"
+  # Storage over-provisioning percentage
+  storageOverProvisioningPercentage: "100"
+  # Minimum available disk capacity percentage
+  storageMinimalAvailablePercentage: "25"
+  # Taint toleration for system-managed components (instance managers, engine images, etc.)
+  # Format: key1=value1:effect1;key2=value2:effect2
+  taintToleration: "node-type=prod:NoSchedule;node-type=staging:NoSchedule"
+  # Node selector for system-managed components (empty = all nodes)
+  systemManagedComponentsNodeSelector: ""
+
+# StorageClass configuration
+persistence:
+  defaultClass: true
+  defaultClassReplicaCount: 3
+
+# CSI configuration
+csi:
+  attacherReplicaCount: 3
+  provisionerReplicaCount: 3
+  resizerReplicaCount: 3
+  snapshotterReplicaCount: 3
+
+# UI configuration
+ingress:
+  enabled: true
+  ingressClassName: "traefik"
+  host: "longhorn.pixr.in"
+  path: "/"
+  pathType: "Prefix"
+  tls: true
+  tlsSecret: "nexus-tls-prod"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+# Ensure Longhorn runs on all nodes with proper tolerations
+longhornManager:
+  nodeSelector: {}
+  tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node-type"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+
+longhornDriver:
+  nodeSelector: {}
+  tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node-type"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+
+longhornUI:
+  nodeSelector: {}
+  tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node-type"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+
+# Global tolerations for all Longhorn components
+global:
+  nodeSelector: {}
+  tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node-type"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+
+# Network policies (disabled by default for k3s)
+networkPolicies:
+  enabled: false
+  type: "k3s"
+
+# Note: The CSI plugin DaemonSet is dynamically created by Longhorn Manager
+# and should respect the taintToleration setting in defaultSettings above.
+# If tolerations are not applied, you may need to restart Longhorn Manager pods
+# or apply the setting through the Longhorn UI/API after installation.
+
