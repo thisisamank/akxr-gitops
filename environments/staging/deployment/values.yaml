@@ -5,13 +5,13 @@ targetRevision: HEAD
 namespace: default
 
 apps:
-  - name: example
-    path: charts/staging
-    valueFiles:
-      - ../../environments/staging/example/values.yaml
+  # - name: example
+  #   path: charts/staging
+  #   valueFiles:
+  #     - ../../environments/staging/example/values.yaml
 
-  - name: staging-postgresql
-    namespace: postgres
-    path: charts/postgresql
-    valueFiles:
-      - ../../environments/staging/postgresql/values.yaml
+  # - name: staging-postgresql
+  #   namespace: postgres
+  #   path: charts/postgresql
+  #   valueFiles:
+  #     - ../../environments/staging/postgresql/values.yaml
