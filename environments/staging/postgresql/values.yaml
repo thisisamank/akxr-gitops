@@ -38,7 +38,7 @@ primary:
   # Persistence configuration
   persistence:
     enabled: true
-    storageClass: "ceph-block"
+    storageClass: "longhorn"
     accessModes:
       - ReadWriteOnce
     size: 10Gi
