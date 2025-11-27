@@ -24,3 +24,4 @@ spec:
   - 'registry.pixr.in'
   - 'longhorn.pixr.in'
   - 'speedtest.pixr.in'
+  - 'ceph.pixr.in'

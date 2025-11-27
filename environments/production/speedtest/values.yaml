@@ -32,7 +32,7 @@ resources:
 
 persistentVolumeClaim:
   enabled: true
-  storageClassName: "longhorn"
+  storageClassName: "ceph-block"
   accessModes:
     - ReadWriteOnce
   size: 1Gi
