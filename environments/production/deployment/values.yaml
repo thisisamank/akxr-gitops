@@ -5,13 +5,13 @@ targetRevision: HEAD
 namespace: default
 
 apps:
-  # - name: speedtest
-  #   path: charts/production
-  #   valueFiles:
-  #     - ../../environments/production/speedtest/values.yaml
+  - name: speedtest
+    path: charts/production
+    valueFiles:
+      - ../../environments/production/speedtest/values.yaml
 
-  # - name: production-postgresql
-  #   path: charts/postgresql
-  #   namespace: postgres
-  #   valueFiles:
-  #     - ../../environments/production/postgresql/values.yaml
+  - name: production-postgresql
+    path: charts/postgresql
+    namespace: postgres
+    valueFiles:
+      - ../../environments/production/postgresql/values.yaml

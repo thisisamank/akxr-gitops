@@ -10,8 +10,8 @@ apps:
   #   valueFiles:
   #     - ../../environments/staging/example/values.yaml
 
-  # - name: staging-postgresql
-  #   namespace: postgres
-  #   path: charts/postgresql
-  #   valueFiles:
-  #     - ../../environments/staging/postgresql/values.yaml
+  - name: staging-postgresql
+    namespace: postgres
+    path: charts/postgresql
+    valueFiles:
+      - ../../environments/staging/postgresql/values.yaml
