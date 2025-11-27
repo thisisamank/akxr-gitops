@@ -2,3 +2,6 @@
 bitnami
 rook
 auth
+redis-secret.yaml
+postgresql-secret.yaml
+redis-staging-secret.yaml

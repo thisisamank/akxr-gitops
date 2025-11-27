@@ -15,3 +15,9 @@ apps:
     namespace: postgres
     valueFiles:
       - ../../environments/production/postgresql/values.yaml
+
+  - name: production-redis
+    namespace: redis
+    path: charts/redis
+    valueFiles:
+      - ../../environments/production/redis/values.yaml
