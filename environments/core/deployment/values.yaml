@@ -44,8 +44,8 @@ apps:
     valueFiles:
       - ../../environments/core/qbittorrent/values.yaml
 
-  - name: longhorn-system
-    path: charts/longhorn/1.10.1
-    namespace: longhorn-system-akxr
-    valueFiles:
-      - ../../../environments/core/longhorn/values.yaml
+  # - name: longhorn-system
+  #   path: charts/longhorn/1.10.1
+  #   namespace: longhorn-system-akxr
+  #   valueFiles:
+  #     - ../../../environments/core/longhorn/values.yaml
