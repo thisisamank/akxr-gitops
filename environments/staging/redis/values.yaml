@@ -1,0 +1,128 @@
+# Redis Staging Configuration
+
+# Authentication - using existing sealed secret
+auth:
+  enabled: true
+  sentinel: true
+  existingSecret: redis-staging-secret
+  existingSecretPasswordKey: redis-password
+  usePasswordFiles: true
+  usePasswordFileFromSecret: true
+
+# Architecture - replication with 1 replica for staging
+architecture: replication
+
+# Image configuration - override chart default tag that doesn't exist
+# Chart default 8.2.1-debian-12-r0 doesn't exist, using 'latest' as workaround
+image:
+  registry: docker.io
+  repository: bitnami/redis
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Master Redis configuration
+master:
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  # Node selector for staging nodes
+  nodeSelector:
+    node-type: staging
+
+  # Tolerations for staging node taints
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: staging
+      effect: NoSchedule
+
+# Replica configuration
+replica:
+  replicaCount: 1
+
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  # Node selector for staging nodes
+  nodeSelector:
+    node-type: staging
+
+  # Tolerations for staging node taints
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: staging
+      effect: NoSchedule
+
+# Sentinel configuration
+sentinel:
+  enabled: true
+  quorum: 1
+
+  # Override sentinel image - chart default tag 8.2.1-debian-12-r0 doesn't exist
+  # Using 'latest' as workaround. For production, verify and pin to specific tag:
+  # docker pull bitnami/redis-sentinel:8.2.1-debian-12-r1  # or check available tags
+  image:
+    registry: docker.io
+    repository: bitnami/redis-sentinel
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Node selector for staging nodes
+  nodeSelector:
+    node-type: staging
+
+  # Tolerations for staging node taints
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: staging
+      effect: NoSchedule
+
+# Network policy
+networkPolicy:
+  enabled: true
+  allowExternal: false
+  allowExternalEgress: true
+
+# Metrics and monitoring (optional)
+metrics:
+  enabled: false
+

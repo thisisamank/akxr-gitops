@@ -15,3 +15,9 @@ apps:
     path: charts/postgresql
     valueFiles:
       - ../../environments/staging/postgresql/values.yaml
+
+  - name: staging-redis
+    namespace: redis
+    path: charts/redis
+    valueFiles:
+      - ../../environments/staging/redis/values.yaml
