@@ -63,12 +63,12 @@ podAnnotations:
 volumes:
   - name: prowlarr-root
     hostPath:
-      path: /home/thisisamank/prowlarr
-      type: Directory
+      path: /var/mnt/media/prowlarr
+      type: DirectoryOrCreate
   - name: prowlarr-data
     hostPath:
-      path: /home/thisisamank/data
-      type: Directory
+      path: /var/mnt/media/data
+      type: DirectoryOrCreate
 
 volumeMounts:
   - name: prowlarr-root

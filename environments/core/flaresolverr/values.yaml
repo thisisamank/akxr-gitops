@@ -45,6 +45,7 @@ readinessProbe:
     port: 8191
 
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+# nodeSelector, tolerations, and affinity inherit from core chart values
+# nodeSelector: {}
+# tolerations: []
+# affinity: {}

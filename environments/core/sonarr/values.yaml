@@ -63,12 +63,12 @@ podAnnotations:
 volumes:
   - name: sonarr-root
     hostPath:
-      path: /home/thisisamank/sonarr
-      type: Directory
+      path: /var/mnt/media/sonarr
+      type: DirectoryOrCreate
   - name: sonarr-data
     hostPath:
-      path: /home/thisisamank/data
-      type: Directory
+      path: /var/mnt/media/data
+      type: DirectoryOrCreate
 
 volumeMounts:
   - name: sonarr-root

@@ -63,12 +63,12 @@ podAnnotations:
 volumes:
   - name: radarr-root
     hostPath:
-      path: /home/thisisamank/radarr
-      type: Directory
+      path: /var/mnt/media/radarr
+      type: DirectoryOrCreate
   - name: radarr-data
     hostPath:
-      path: /home/thisisamank/data
-      type: Directory
+      path: /var/mnt/media/data
+      type: DirectoryOrCreate
 
 volumeMounts:
   - name: radarr-root

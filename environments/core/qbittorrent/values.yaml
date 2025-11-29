@@ -72,12 +72,12 @@ podAnnotations:
 volumes:
   - name: qbittorrent-root
     hostPath:
-      path: /home/thisisamank/qbittorrent
-      type: Directory
+      path: /var/mnt/media/qbittorrent
+      type: DirectoryOrCreate
   - name: qbittorrent-data
     hostPath:
-      path: /home/thisisamank/data
-      type: Directory
+      path: /var/mnt/media/data
+      type: DirectoryOrCreate
   # - name: vpn-files
   #   projected:
   #     sources:
