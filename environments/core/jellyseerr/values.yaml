@@ -62,8 +62,8 @@ podAnnotations:
 volumes:
   - name: jellyseerr-config
     hostPath:
-      path: /home/thisisamank/jellyseerr
-      type: Directory
+      path: /var/mnt/media/jellyseerr
+      type: DirectoryOrCreate
 
 
 volumeMounts:

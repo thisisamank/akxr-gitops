@@ -25,3 +25,4 @@ data:
   # This prevents redirect issues when behind a proxy
   url: https://argocd.pixr.in
 
+
