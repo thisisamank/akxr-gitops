@@ -67,7 +67,7 @@ primary:
 
   # Tolerations for staging node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: staging
       effect: NoSchedule

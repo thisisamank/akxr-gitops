@@ -45,7 +45,7 @@ master:
 
   # Tolerations for staging node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: staging
       effect: NoSchedule
@@ -77,7 +77,7 @@ replica:
 
   # Tolerations for staging node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: staging
       effect: NoSchedule
@@ -111,7 +111,7 @@ sentinel:
 
   # Tolerations for staging node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: staging
       effect: NoSchedule

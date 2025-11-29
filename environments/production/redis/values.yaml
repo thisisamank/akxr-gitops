@@ -45,7 +45,7 @@ master:
 
   # Tolerations for production node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: prod
       effect: NoSchedule
@@ -77,7 +77,7 @@ replica:
 
   # Tolerations for production node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: prod
       effect: NoSchedule
@@ -111,7 +111,7 @@ sentinel:
 
   # Tolerations for production node taints
   tolerations:
-    - key: node-type
+    - key: node
       operator: Equal
       value: prod
       effect: NoSchedule
