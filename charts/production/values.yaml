@@ -161,7 +161,7 @@ nodeSelector:
   node-type: prod
 
 tolerations:
-  - key: node-type
+  - key: node
     operator: Equal
     value: prod
     effect: NoSchedule
