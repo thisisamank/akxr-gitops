@@ -161,7 +161,7 @@ nodeSelector:
   node-type: staging
 
 tolerations:
-  - key: node-type
+  - key: node
     operator: Equal
     value: staging
     effect: NoSchedule
