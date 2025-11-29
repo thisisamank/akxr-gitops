@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Allow ArgoCD to accept HTTP connections when behind a proxy (Cloudflare Tunnel)
+  # This prevents redirect loops when Cloudflare terminates TLS and sends HTTP to origin
+  server.insecure: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Set the public URL so ArgoCD knows its external address
+  # This prevents redirect issues when behind a proxy
+  url: https://argocd.pixr.in
+

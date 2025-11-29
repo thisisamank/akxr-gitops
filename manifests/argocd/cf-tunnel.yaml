@@ -43,7 +43,7 @@ spec:
       volumes:
       - name: creds
         secret:
-          secretName: tunnel-credentials
+          secretName: cloudflared-credentials
           items:
           - key: credentials.json
             path: credentials.json
@@ -67,7 +67,7 @@ metadata:
   namespace: cloudflared
 data:
   config.yaml: |
-    tunnel: 5665426e-2fa3-4b18-bf5b-0d5a036ad5de
+    tunnel: fad99184-fbc0-4d8c-beae-4593ee1236f4
     credentials-file: /etc/cloudflared/creds/credentials.json
     metrics: 0.0.0.0:2000
     no-autoupdate: true
@@ -76,5 +76,5 @@ data:
       http2Origin: true
     ingress:
     - hostname: "*.pixr.in"
-      service: http://traefik.kube-system.svc.cluster.local:80
+      service: http://traefik.traefik.svc.cluster.local:80
     - service: http_status:404

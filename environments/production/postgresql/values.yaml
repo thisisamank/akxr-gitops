@@ -55,11 +55,6 @@ primary:
     enabled: true
     allowExternal: false
     allowExternalEgress: true
-    # Allow access from default namespace with production-postgresql-client label
-    ingressNSMatchLabels:
-      kubernetes.io/metadata.name: default
-    ingressNSPodMatchLabels:
-      production-postgresql-client: "true"
 
   # Pod disruption budget
   pdb:
