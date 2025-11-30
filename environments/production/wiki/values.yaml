@@ -32,6 +32,10 @@ resources:
     cpu: 200m
     memory: 256Mi
 
+# Fix volume permissions - docmost runs as uid 1000
+podSecurityContext:
+  fsGroup: 1000
+
 # Environment variables
 env:
   - name: APP_URL
