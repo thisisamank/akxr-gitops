@@ -119,7 +119,7 @@ sentinel:
 # Network policy
 networkPolicy:
   enabled: true
-  allowExternal: false
+  allowExternal: true
   allowExternalEgress: true
 
 # Metrics and monitoring (optional)
