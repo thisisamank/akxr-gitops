@@ -13,6 +13,12 @@ spec:
       labels:
         app: cloudflared
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: talos-ute-nle
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       containers:
       - name: cloudflared
         image: cloudflare/cloudflared:latest

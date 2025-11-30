@@ -1,0 +1,65 @@
+# Cert-manager Helm values with tolerations for tainted nodes
+# To upgrade: helm upgrade cert-manager jetstack/cert-manager -n cert-manager -f manifests/argocd/cert-manager-values.yaml
+
+installCRDs: true
+
+# Global tolerations for all cert-manager components
+global:
+  leaderElection:
+    namespace: cert-manager
+
+tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "prod"
+    effect: "NoSchedule"
+  - key: "node"
+    operator: "Equal"
+    value: "staging"
+    effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+cainjector:
+  tolerations:
+    - key: "node"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+webhook:
+  tolerations:
+    - key: "node"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+startupapicheck:
+  tolerations:
+    - key: "node"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
