@@ -1,0 +1,44 @@
+image:
+  repository: ghcr.io/logseq/logseq-webapp
+  tag: "latest"
+  pullPolicy: Always
+
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 3001
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: wiki.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - wiki.pixr.in
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+
+# Pod labels and annotations
+podLabels:
+  app: wiki
+
+
+livenessProbe: null
+readinessProbe: null
+

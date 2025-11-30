@@ -22,8 +22,8 @@ apps:
     valueFiles:
       - ../../environments/production/redis/values.yaml
 
-  - name: production-outline
+  - name: wiki
     namespace: default
-    path: charts/outline
+    path: charts/production
     valueFiles:
-      - ../../environments/production/outline/values.yaml
+      - ../../environments/production/wiki/values.yaml
