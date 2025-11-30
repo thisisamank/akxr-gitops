@@ -53,7 +53,7 @@ primary:
   # Network policy
   networkPolicy:
     enabled: true
-    allowExternal: false
+    allowExternal: true
     allowExternalEgress: true
 
   # Pod disruption budget

@@ -1,20 +1,20 @@
 image:
-  repository: ghcr.io/logseq/logseq-webapp
+  repository: docmost/docmost
   tag: "latest"
   pullPolicy: Always
 
-
-replicaCount: 2
+replicaCount: 1
 
 service:
   type: ClusterIP
-  port: 80
+  port: 3000
 
 ingress:
   enabled: true
   className: "traefik"
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
   hosts:
     - host: wiki.pixr.in
       paths:
@@ -27,18 +27,54 @@ ingress:
 
 resources:
   limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
     cpu: 200m
     memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
 
+# Environment variables
+env:
+  - name: APP_URL
+    value: "https://wiki.pixr.in"
+  - name: APP_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: APP_SECRET
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: DATABASE_URL
+  - name: REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: REDIS_URL
 
-# Pod labels and annotations
+# Persistent storage for uploads
+persistentVolumeClaim:
+  enabled: true
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /app/data/storage
+
 podLabels:
   app: wiki
 
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
 
-livenessProbe: null
-readinessProbe: null
-
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 5
