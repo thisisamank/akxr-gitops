@@ -1,0 +1,108 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    targetRevision: 8.1.0
+    helm:
+      valuesObject:
+        # Global tolerations for all ArgoCD components
+        global:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Controller (StatefulSet)
+        controller:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Server
+        server:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+          # Allow insecure mode (HTTP) behind Cloudflare tunnel
+          extraArgs:
+            - --insecure
+
+        # Repo Server
+        repoServer:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # ApplicationSet Controller
+        applicationSet:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Notifications Controller
+        notifications:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Redis
+        redis:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Dex
+        dex:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            kubernetes.io/hostname: talos-ute-nle
+
+        # Configs
+        configs:
+          cm:
+            url: https://argocd.pixr.in
+          params:
+            server.insecure: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+

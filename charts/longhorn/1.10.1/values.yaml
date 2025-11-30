@@ -7,7 +7,18 @@ global:
   # -- Global override for image pull secrets for container registry.
   imagePullSecrets: []
   # -- Toleration for nodes allowed to run user-deployed components such as Longhorn Manager, Longhorn UI, and Longhorn Driver Deployer.
-  tolerations: []
+  tolerations:
+    - key: "node"
+      operator: "Equal"
+      value: "prod"
+      effect: "NoSchedule"
+    - key: "node"
+      operator: "Equal"
+      value: "staging"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
   # -- Node selector for nodes allowed to run user-deployed components such as Longhorn Manager, Longhorn UI, and Longhorn Driver Deployer.
   nodeSelector: {}
   cattle:
@@ -271,7 +282,7 @@ defaultSettings:
   supportBundleFailedHistoryLimit: ~
   # -- Taint or toleration for system-managed Longhorn components.
   # Specify values using a semicolon-separated list in `kubectl taint` syntax (Example: key1=value1:effect; key2=value2:effect).
-  taintToleration: ~
+  taintToleration: "node-role.kubernetes.io/control-plane:NoSchedule;node=prod:NoSchedule;node=staging:NoSchedule"
   # -- Node selector for system-managed Longhorn components.
   systemManagedComponentsNodeSelector: ~
   # -- PriorityClass for system-managed Longhorn components.
@@ -322,7 +333,7 @@ defaultSettings:
   guaranteedInstanceManagerCPU: ~
   # -- Setting that notifies Longhorn that the cluster is using the Kubernetes Cluster Autoscaler.
   kubernetesClusterAutoscalerEnabled: ~
-  # -- Enables Longhorn to automatically delete orphaned resources and their associated data or processes (e.g., stale replicas). Orphaned resources on failed or unknown nodes are not automatically cleaned up. 
+  # -- Enables Longhorn to automatically delete orphaned resources and their associated data or processes (e.g., stale replicas). Orphaned resources on failed or unknown nodes are not automatically cleaned up.
   # You need to specify the resource types to be deleted using a semicolon-separated list (e.g., `replica-data;instance`). Available items are: `replica-data`, `instance`.
   orphanResourceAutoDeletion: ~
   # -- Specifies the wait time, in seconds, before Longhorn automatically deletes an orphaned Custom Resource (CR) and its associated resources.
