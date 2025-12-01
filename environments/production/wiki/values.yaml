@@ -15,14 +15,14 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
   hosts:
-    - host: wiki.pixr.in
+    - host: wiki.akxr.in
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: nexus-tls-prod
       hosts:
-        - wiki.pixr.in
+        - wiki.akxr.in
 
 resources:
   limits:
@@ -39,7 +39,7 @@ podSecurityContext:
 # Environment variables
 env:
   - name: APP_URL
-    value: "https://wiki.pixr.in"
+    value: "https://wiki.akxr.in"
   - name: APP_SECRET
     valueFrom:
       secretKeyRef:
