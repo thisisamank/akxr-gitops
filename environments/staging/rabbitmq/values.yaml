@@ -1,0 +1,79 @@
+# RabbitMQ Staging Configuration
+
+# Authentication - using existing sealed secret
+auth:
+  username: "akxr"
+  existingPasswordSecret: rabbitmq-staging-secret
+  existingSecretPasswordKey: rabbitmq-password
+  existingErlangSecret: rabbitmq-staging-secret
+  existingSecretErlangKey: rabbitmq-erlang-cookie
+
+# Architecture - standalone for staging
+replicaCount: 1
+
+# Image configuration
+image:
+  registry: docker.io
+  repository: bitnami/rabbitmq
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Clustering - disabled for standalone
+clustering:
+  enabled: false
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 2Gi
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    amqp: 5672
+    amqpTls: 5671
+    dist: 25672
+    manager: 15672
+    metrics: 9419
+    epmd: 4369
+
+# Node selector for staging nodes
+nodeSelector:
+  node-type: staging
+
+# Tolerations for staging node taints
+tolerations:
+  - key: node
+    operator: Equal
+    value: staging
+    effect: NoSchedule
+
+# Network policy
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+
+# Pod disruption budget
+pdb:
+  create: true
+  minAvailable: ""
+  maxUnavailable: 1
+
+# Metrics and monitoring (optional)
+metrics:
+  enabled: false
+
