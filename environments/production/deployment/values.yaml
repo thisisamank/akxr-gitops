@@ -27,3 +27,9 @@ apps:
     path: charts/production
     valueFiles:
       - ../../environments/production/wiki/values.yaml
+
+  - name: production-rabbitmq
+    namespace: rabbitmq
+    path: charts/rabbitmq
+    valueFiles:
+      - ../../environments/production/rabbitmq/values.yaml
