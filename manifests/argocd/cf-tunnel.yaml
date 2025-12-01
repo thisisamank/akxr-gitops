@@ -83,4 +83,6 @@ data:
     ingress:
     - hostname: "*.pixr.in"
       service: http://traefik.traefik.svc.cluster.local:80
+    - hostname: "*.akxr.in"
+      service: http://traefik.traefik.svc.cluster.local:80
     - service: http_status:404
