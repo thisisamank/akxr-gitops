@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zulip.fullname" . }}
+  labels:
+    {{- include "zulip.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.zulip.service.type }}
+  ports:
+    - port: {{ .Values.zulip.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "zulip.selectorLabels" . | nindent 4 }}
+

@@ -1,0 +1,166 @@
+# Zulip Helm Chart Default Values
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Node placement
+nodeSelector: {}
+tolerations: []
+
+# Zulip application
+zulip:
+  replicaCount: 1
+
+  image:
+    repository: zulip/docker-zulip
+    tag: "11.4-0"
+    pullPolicy: IfNotPresent
+
+  # External hostname (without https://)
+  externalHost: "chat.example.com"
+  administrator: "admin@example.com"
+  authBackends: "EmailAuthBackend"
+  pushNotifications: true
+
+  # Set to true if running behind a reverse proxy that handles TLS
+  disableHttps: true
+  # Comma-separated list of load balancer IPs (for X-Forwarded-For trust)
+  loadBalancerIPs: ""
+
+  # Use existing secret instead of creating one
+  existingSecret: ""
+
+  # Email configuration
+  email:
+    host: "smtp.example.com"
+    user: "user@example.com"
+    port: "587"
+    useSSL: "False"
+    useTLS: "True"
+    noreplyAddress: "noreply@example.com"
+    addTokensToNoreply: "False"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: chat.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  persistence:
+    size: 10Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# PostgreSQL (Zulip-specific image with required extensions)
+postgresql:
+  image:
+    repository: zulip/zulip-postgresql
+    tag: "14"
+    pullPolicy: IfNotPresent
+
+  auth:
+    database: zulip
+    username: zulip
+
+  persistence:
+    size: 10Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Memcached
+memcached:
+  image:
+    repository: memcached
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# Redis
+redis:
+  image:
+    repository: redis
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+
+  persistence:
+    size: 1Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# RabbitMQ
+rabbitmq:
+  image:
+    repository: rabbitmq
+    tag: "4.1"
+    pullPolicy: IfNotPresent
+
+  auth:
+    username: zulip
+
+  persistence:
+    size: 2Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+

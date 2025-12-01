@@ -33,3 +33,9 @@ apps:
     path: charts/rabbitmq
     valueFiles:
       - ../../environments/production/rabbitmq/values.yaml
+
+  - name: zulip
+    namespace: zulip
+    path: charts/zulip
+    valueFiles:
+      - ../../environments/production/zulip/values.yaml

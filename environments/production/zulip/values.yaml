@@ -1,0 +1,172 @@
+# Zulip Production Values
+
+# Node placement - run on prod nodes
+nodeSelector:
+  node-type: prod
+
+tolerations:
+  - key: node
+    operator: Equal
+    value: prod
+    effect: NoSchedule
+
+# Zulip application
+zulip:
+  replicaCount: 1
+
+  image:
+    repository: zulip/docker-zulip
+    tag: "11.4-0"
+    pullPolicy: IfNotPresent
+
+  externalHost: "chat.akxr.in"
+  administrator: "aman@akxr.in"
+  authBackends: "EmailAuthBackend"
+  pushNotifications: true
+
+  # Running behind traefik, disable internal HTTPS
+  disableHttps: true
+  # Trust Traefik proxy - use pod CIDR range
+  loadBalancerIPs: "10.244.0.0/16"
+
+  # Use sealed secret
+  existingSecret: "zulip-secret"
+
+  # Email configuration (Brevo SMTP)
+  email:
+    host: "smtp-relay.brevo.com"
+    user: "9c16eb001@smtp-brevo.com"
+    port: "587"
+    useSSL: "False"
+    useTLS: "True"
+    noreplyAddress: "noreply@akxr.in"
+    addTokensToNoreply: "False"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
+    hosts:
+      - host: chat.akxr.in
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: nexus-tls-prod
+        hosts:
+          - chat.akxr.in
+
+  persistence:
+    size: 20Gi
+    storageClass: "longhorn"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 3Gi
+    limits:
+      cpu: 2000m
+      memory: 6Gi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 180
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# PostgreSQL
+postgresql:
+  image:
+    repository: zulip/zulip-postgresql
+    tag: "14"
+    pullPolicy: IfNotPresent
+
+  auth:
+    database: zulip
+    username: zulip
+
+  persistence:
+    size: 20Gi
+    storageClass: "longhorn"
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Memcached
+memcached:
+  image:
+    repository: memcached
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Redis
+redis:
+  image:
+    repository: redis
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+
+  persistence:
+    size: 2Gi
+    storageClass: "longhorn"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# RabbitMQ
+rabbitmq:
+  image:
+    repository: rabbitmq
+    tag: "4.1"
+    pullPolicy: IfNotPresent
+
+  auth:
+    username: zulip
+
+  persistence:
+    size: 5Gi
+    storageClass: "longhorn"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+

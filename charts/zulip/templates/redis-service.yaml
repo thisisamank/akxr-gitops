@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zulip.fullname" . }}-redis
+  labels:
+    {{- include "zulip.redis.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    {{- include "zulip.redis.selectorLabels" . | nindent 4 }}
+

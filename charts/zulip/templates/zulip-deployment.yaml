@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zulip.fullname" . }}
+  labels:
+    {{- include "zulip.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.zulip.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "zulip.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "zulip.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: zulip
+          image: "{{ .Values.zulip.image.repository }}:{{ .Values.zulip.image.tag }}"
+          imagePullPolicy: {{ .Values.zulip.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          env:
+            # Database
+            - name: DB_HOST
+              value: {{ include "zulip.fullname" . }}-postgresql
+            - name: DB_HOST_PORT
+              value: "5432"
+            - name: DB_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: SECRETS_postgres_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: POSTGRES_PASSWORD
+            # Memcached
+            - name: SETTING_MEMCACHED_LOCATION
+              value: "{{ include "zulip.fullname" . }}-memcached:11211"
+            - name: SECRETS_memcached_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: MEMCACHED_PASSWORD
+            # RabbitMQ
+            - name: SETTING_RABBITMQ_HOST
+              value: {{ include "zulip.fullname" . }}-rabbitmq
+            - name: SECRETS_rabbitmq_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: RABBITMQ_PASSWORD
+            # Redis
+            - name: SETTING_REDIS_HOST
+              value: {{ include "zulip.fullname" . }}-redis
+            - name: SECRETS_redis_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: REDIS_PASSWORD
+            # Zulip settings
+            - name: SECRETS_secret_key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: SECRET_KEY
+            - name: SETTING_EXTERNAL_HOST
+              value: {{ .Values.zulip.externalHost | quote }}
+            - name: SETTING_ZULIP_ADMINISTRATOR
+              value: {{ .Values.zulip.administrator | quote }}
+            - name: ZULIP_AUTH_BACKENDS
+              value: {{ .Values.zulip.authBackends | quote }}
+            # Email settings
+            - name: SETTING_EMAIL_HOST
+              value: {{ .Values.zulip.email.host | quote }}
+            - name: SETTING_EMAIL_HOST_USER
+              value: {{ .Values.zulip.email.user | quote }}
+            - name: SETTING_EMAIL_PORT
+              value: {{ .Values.zulip.email.port | quote }}
+            - name: SETTING_EMAIL_USE_SSL
+              value: {{ .Values.zulip.email.useSSL | quote }}
+            - name: SETTING_EMAIL_USE_TLS
+              value: {{ .Values.zulip.email.useTLS | quote }}
+            - name: SETTING_NOREPLY_EMAIL_ADDRESS
+              value: {{ .Values.zulip.email.noreplyAddress | quote }}
+            - name: SETTING_ADD_TOKENS_TO_NOREPLY_ADDRESS
+              value: {{ .Values.zulip.email.addTokensToNoreply | quote }}
+            - name: SECRETS_email_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.zulip.existingSecret | default (printf "%s-secret" (include "zulip.fullname" .)) }}
+                  key: EMAIL_PASSWORD
+            # Push notifications
+            {{- if .Values.zulip.pushNotifications }}
+            - name: SETTING_ZULIP_SERVICE_PUSH_NOTIFICATIONS
+              value: "True"
+            {{- end }}
+            # SSL - when running behind reverse proxy, disable HTTPS and use self-signed certs to satisfy startup checks
+            {{- if .Values.zulip.disableHttps }}
+            - name: DISABLE_HTTPS
+              value: "true"
+            - name: SSL_CERTIFICATE_GENERATION
+              value: "self-signed"
+            {{- end }}
+            {{- if .Values.zulip.loadBalancerIPs }}
+            - name: LOADBALANCER_IPS
+              value: {{ .Values.zulip.loadBalancerIPs | quote }}
+            # Trust proxy headers for proper URL reconstruction
+            - name: SETTING_USE_X_FORWARDED_HOST
+              value: "True"
+            - name: SETTING_USE_X_FORWARDED_PORT
+              value: "True"
+            # CSRF trusted origins for Cloudflare proxy
+            - name: SETTING_CSRF_TRUSTED_ORIGINS
+              value: '["https://{{ .Values.zulip.externalHost }}"]'
+            # Disable rate limiting (behind Cloudflare, all requests appear from same IP)
+            - name: SETTING_RATE_LIMITING
+              value: "False"
+            {{- end }}
+          volumeMounts:
+            - name: zulip-data
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.zulip.resources | nindent 12 }}
+      volumes:
+        - name: zulip-data
+          persistentVolumeClaim:
+            claimName: {{ include "zulip.fullname" . }}-data
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
