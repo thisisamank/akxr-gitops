@@ -1,0 +1,7 @@
+apiVersion: v2
+name: zulip
+description: Zulip - Team chat with PostgreSQL, Memcached, RabbitMQ, and Redis
+type: application
+version: 1.0.0
+appVersion: "11.4"
+
