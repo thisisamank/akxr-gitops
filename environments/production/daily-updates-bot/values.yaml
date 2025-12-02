@@ -9,7 +9,7 @@ failedJobsHistoryLimit: 1
 
 # Image configuration
 image:
-  repository: thisisyashgarg/daly-updates-bot
+  repository: thisisyashgarg/daily-updates-bot
   tag: "6f7e837"
   pullPolicy: IfNotPresent
 
