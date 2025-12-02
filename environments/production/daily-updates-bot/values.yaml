@@ -44,3 +44,14 @@ volumes:
 podLabels:
   app: daily-updates-bot
 
+# Node selector for production nodes
+nodeSelector:
+  node-type: prod
+
+# Tolerations for production node taints
+tolerations:
+  - key: node
+    operator: Equal
+    value: prod
+    effect: NoSchedule
+
