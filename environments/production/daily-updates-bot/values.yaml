@@ -1,0 +1,46 @@
+# Daily Updates Bot CronJob Configuration
+
+# CronJob schedule - Every day at 5 PM UTC
+schedule: "0 17 * * *"
+
+# Job history limits
+successfulJobsHistoryLimit: 1
+failedJobsHistoryLimit: 1
+
+# Image configuration
+image:
+  repository: thisisyashgarg/daly-updates-bot
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Working directory
+workingDir: /daily-updates-bot
+
+# Resource limits
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+# Restart policy
+restartPolicy: OnFailure
+
+# Volume mounts - secret mounted at /root
+volumeMounts:
+  - name: daily-updates-bot-config
+    mountPath: /root
+    readOnly: true
+
+# Volumes - secret reference
+volumes:
+  - name: daily-updates-bot-config
+    secret:
+      secretName: daily-updates-bot-config
+
+# Pod labels
+podLabels:
+  app: daily-updates-bot
+

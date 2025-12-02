@@ -39,3 +39,9 @@ apps:
     path: charts/zulip
     valueFiles:
       - ../../environments/production/zulip/values.yaml
+
+  - name: daily-updates-bot
+    namespace: default
+    path: charts/cronjob
+    valueFiles:
+      - ../../environments/production/daily-updates-bot/values.yaml

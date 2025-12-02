@@ -1,0 +1,14 @@
+1. CronJob has been deployed successfully!
+
+2. Check the CronJob status:
+   kubectl get cronjob {{ include "cronjob.fullname" . }} --namespace {{ .Release.Namespace }}
+
+3. View scheduled jobs:
+   kubectl get jobs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+4. View job logs:
+   kubectl logs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=100
+
+5. Schedule: {{ .Values.schedule }}
+   Concurrency Policy: {{ .Values.concurrencyPolicy }}
+
