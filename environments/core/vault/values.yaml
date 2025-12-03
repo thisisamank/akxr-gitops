@@ -39,6 +39,37 @@ podSecurityContext:
 env:
   - name: DOMAIN
     value: "https://vault.akxr.in"
+  # SMTP Configuration
+  - name: SMTP_HOST
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_HOST
+  - name: SMTP_PORT
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_PORT
+  - name: SMTP_SECURITY
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_SECURITY
+  - name: SMTP_FROM
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_FROM
+  - name: SMTP_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_USERNAME
+  - name: SMTP_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: vaultwarden-secret
+        key: SMTP_PASSWORD
 
 persistentVolumeClaim:
   enabled: true
