@@ -1,7 +1,8 @@
 # Daily Updates Bot CronJob Configuration
 
-# CronJob schedule - Every day at 5 PM UTC
+# CronJob schedule - Every day at 5 PM IST
 schedule: "0 17 * * *"
+timeZone: "Asia/Kolkata"
 
 # Job history limits
 successfulJobsHistoryLimit: 1

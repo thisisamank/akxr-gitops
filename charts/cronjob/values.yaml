@@ -5,6 +5,10 @@
 # CronJob schedule (required) - cron format: "*/5 * * * *"
 schedule: "0 0 * * *"
 
+# Optional: Timezone for the schedule (e.g., "Asia/Kolkata", "UTC", "America/New_York")
+# If not set, defaults to UTC
+timeZone: ""
+
 # Concurrency policy: Allow, Forbid, or Replace
 concurrencyPolicy: Forbid
 
