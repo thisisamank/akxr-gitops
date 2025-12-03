@@ -1,0 +1,55 @@
+image:
+  repository: vaultwarden/server
+  tag: "latest"
+  pullPolicy: Always
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: vault.akxr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - vault.akxr.in
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+podSecurityContext:
+  fsGroup: 1000
+
+# Environment variables
+env:
+  - name: DOMAIN
+    value: "https://vault.akxr.in"
+
+persistentVolumeClaim:
+  enabled: true
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /data/
+
+podLabels:
+  app: vault
+
+livenessProbe: null
+readinessProbe: null

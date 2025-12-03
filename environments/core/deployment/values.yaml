@@ -5,44 +5,49 @@ targetRevision: HEAD
 namespace: default
 
 apps:
-  - name: jellyfin
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/jellyfin/values.yaml
+  # - name: jellyfin
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/jellyfin/values.yaml
 
-  - name: flaresolverr
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/flaresolverr/values.yaml
-  - name: jellyseerr
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/jellyseerr/values.yaml
+  # - name: flaresolverr
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/flaresolverr/values.yaml
+  # - name: jellyseerr
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/jellyseerr/values.yaml
 
   - name: ntfy
     path: charts/core
     valueFiles:
       - ../../environments/core/ntfy/values.yaml
 
-  - name: prowlarr
+  - name: vault
     path: charts/core
     valueFiles:
-      - ../../environments/core/prowlarr/values.yaml
+      - ../../environments/core/vault/values.yaml
 
-  - name: radarr
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/radarr/values.yaml
+  # - name: prowlarr
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/prowlarr/values.yaml
 
-  - name: sonarr
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/sonarr/values.yaml
+  # - name: radarr
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/radarr/values.yaml
 
-  - name: qbittorrent
-    path: charts/core
-    valueFiles:
-      - ../../environments/core/qbittorrent/values.yaml
+  # - name: sonarr
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/sonarr/values.yaml
+
+  # - name: qbittorrent
+  #   path: charts/core
+  #   valueFiles:
+  #     - ../../environments/core/qbittorrent/values.yaml
 
   # - name: longhorn-system
   #   path: charts/longhorn/1.10.1
