@@ -6,6 +6,9 @@ metadata:
     {{- include "cronjob.labels" . | nindent 4 }}
 spec:
   schedule: {{ .Values.schedule | quote }}
+  {{- if .Values.timeZone }}
+  timeZone: {{ .Values.timeZone | quote }}
+  {{- end }}
   {{- if .Values.concurrencyPolicy }}
   concurrencyPolicy: {{ .Values.concurrencyPolicy }}
   {{- end }}
