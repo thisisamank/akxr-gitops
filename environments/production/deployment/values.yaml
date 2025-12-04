@@ -24,7 +24,7 @@ apps:
 
   - name: wiki
     namespace: default
-    path: charts/production
+    path: charts/core
     valueFiles:
       - ../../environments/production/wiki/values.yaml
 
