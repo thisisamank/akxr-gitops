@@ -130,8 +130,10 @@ server:
       enabled: true
       className: traefik
       annotations:
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
         traefik.ingress.kubernetes.io/router.entrypoints: web
+        # Middleware for large file uploads (50GB body size, extended timeouts)
+        # Entrypoint timeouts (600s) are configured in traefik-app.yaml
+        traefik.ingress.kubernetes.io/router.middlewares: immich-immich-timeout@kubernetescrd
       hosts:
         - host: photos.akxr.in
           paths:

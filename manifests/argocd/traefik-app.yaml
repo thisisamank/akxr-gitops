@@ -28,6 +28,15 @@ spec:
         ingressRoute:
           dashboard:
             enabled: false
+        # Entrypoint configuration for large file uploads (Immich, etc.)
+        # Per Immich docs: https://docs.immich.app/administration/reverse-proxy/
+        # Configure timeouts via static configuration file
+        # Note: Traefik v3 uses entryPoints.web.transport.respondingTimeouts
+        # This is configured via a static config file mounted as ConfigMap
+        additionalArguments:
+          - "--entrypoints.web.transport.respondingTimeouts.readTimeout=600s"
+          - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=600s"
+          - "--entrypoints.web.transport.respondingTimeouts.writeTimeout=600s"
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
