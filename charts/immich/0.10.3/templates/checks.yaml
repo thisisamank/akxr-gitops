@@ -1,0 +1,9 @@
+{{- if and (not .Values.immich.persistence.library.existingClaim) (not .Values.immich.persistence.library.hostPath) -}}
+{{- fail ".Values.immich.persistence.library.existingClaim or .Values.immich.persistence.library.hostPath is required." -}}
+{{- end -}}
+
+{{/* PostgreSQL check removed - we bundle our own PostgreSQL with pgvecto.rs */}}
+
+{{ if hasKey .Values "redis" }}
+    {{ fail "The redis subchart has been removed. Use valkey instead."}}
+{{ end }}
