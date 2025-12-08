@@ -42,7 +42,7 @@ apps:
       - ../../environments/core/zulip/values.yaml
 
   - name: immich
-    namespace: immich
+    namespace: default
     path: charts/immich/0.10.3
     valueFiles:
       - ../../../environments/core/immich/values.yaml

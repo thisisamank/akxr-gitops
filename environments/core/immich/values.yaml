@@ -19,12 +19,12 @@ controllers:
         env:
           REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
-          # PostgreSQL connection - using bundled PostgreSQL with pgvecto.rs
+          # PostgreSQL connection
           DB_HOSTNAME: '{{ printf "%s-postgresql" .Release.Name }}'
           DB_PORT: "5432"
           DB_DATABASE_NAME: "immich"
           DB_USERNAME: "immich"
-          DB_PASSWORD: "immich-secret-password"
+          DB_PASSWORD: "immich-db-internal-password"
 
 immich:
   metrics:
@@ -35,7 +35,23 @@ immich:
       hostPath: /var/mnt/media/immich
       node: talos-ute-nle
       size: 500Gi
-  configuration: {}
+  # Ref: https://immich.app/docs/install/config-file/
+  configuration:
+    notifications:
+      smtp:
+        enabled: true
+        from:
+          name: "Aman"
+          address: "photos@akxr.in"
+        replyTo:
+          name: "Aman"
+          address: "aman@akxr.in"
+        transport:
+          host: "smtp-relay.brevo.com"
+          port: 587
+          username: "9c16eb001@smtp-brevo.com"
+          # Password set via admin UI after deployment
+          ignoreCert: false
 
 # Bundled PostgreSQL with pgvecto.rs for vector search
 postgresql:
@@ -47,8 +63,8 @@ postgresql:
     pullPolicy: IfNotPresent
   auth:
     username: immich
-    password: immich-secret-password
     database: immich
+    password: "immich-db-internal-password"
   persistence:
     # Use hostPath for database storage
     hostPath: /var/mnt/media/immich-db
@@ -89,6 +105,7 @@ server:
           image:
             repository: ghcr.io/immich-app/immich-server
             pullPolicy: IfNotPresent
+          # SMTP configured via Immich admin UI after deployment
           resources:
             requests:
               cpu: 200m
