@@ -10,6 +10,9 @@ spec:
   {{- if .Values.redis.persistence.storageClass }}
   storageClassName: {{ .Values.redis.persistence.storageClass }}
   {{- end }}
+  {{- if .Values.redis.persistence.volumeName }}
+  volumeName: {{ .Values.redis.persistence.volumeName }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.redis.persistence.size }}

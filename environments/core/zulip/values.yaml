@@ -63,6 +63,8 @@ zulip:
   persistence:
     size: 20Gi
     storageClass: "longhorn"
+    # Pin to existing PV to preserve data across restarts
+    volumeName: "pvc-24e0fc46-c499-4c93-9c06-d6ec9017fa99"
 
   resources:
     requests:
@@ -138,6 +140,8 @@ redis:
   persistence:
     size: 2Gi
     storageClass: "longhorn"
+    # Pin to existing PV to preserve data across restarts
+    volumeName: "pvc-8c269fde-e381-4488-91b8-9fa7e7106892"
 
   resources:
     requests:
@@ -160,6 +164,8 @@ rabbitmq:
   persistence:
     size: 5Gi
     storageClass: "longhorn"
+    # Pin to existing PV to preserve data across restarts
+    volumeName: "pvc-97b7f9f7-9a5c-4e00-b0e9-e012c325c80f"
 
   resources:
     requests:

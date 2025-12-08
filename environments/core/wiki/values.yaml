@@ -101,6 +101,8 @@ persistentVolumeClaim:
     - ReadWriteOnce
   size: 5Gi
   mountPath: /app/data/storage
+  # Pin to existing PV to preserve data across restarts
+  volumeName: "pvc-ac8ab59f-e6d4-41c0-acd6-e0bc6b22da16"
 
 podLabels:
   app: wiki
