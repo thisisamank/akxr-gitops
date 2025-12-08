@@ -1,0 +1,130 @@
+image:
+  repository: docmost/docmost
+  tag: "latest"
+  pullPolicy: Always
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: wiki.akxr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - wiki.akxr.in
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+# Fix volume permissions - docmost runs as uid 1000
+podSecurityContext:
+  fsGroup: 1000
+
+# Environment variables
+env:
+  - name: APP_URL
+    value: "https://wiki.akxr.in"
+  - name: APP_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: APP_SECRET
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: DATABASE_URL
+  - name: REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: REDIS_URL
+  - name: MAIL_DRIVER
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: MAIL_DRIVER
+  - name: SMTP_HOST
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: SMTP_HOST
+  - name: SMTP_PORT
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: SMTP_PORT
+  - name: SMTP_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: SMTP_USERNAME
+  - name: SMTP_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: SMTP_PASSWORD
+  - name: SMTP_SECURE
+    value: "false"
+  - name: MAIL_FROM_ADDRESS
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: MAIL_FROM_ADDRESS
+  - name: MAIL_FROM_NAME
+    valueFrom:
+      secretKeyRef:
+        name: docmost-secret
+        key: MAIL_FROM_NAME
+
+# Persistent storage for uploads - KEEP SAME PVC
+persistentVolumeClaim:
+  enabled: true
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /app/data/storage
+
+podLabels:
+  app: wiki
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+# Control plane node placement
+nodeSelector:
+  kubernetes.io/hostname: talos-ute-nle
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+

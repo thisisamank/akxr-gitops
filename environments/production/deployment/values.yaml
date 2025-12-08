@@ -22,12 +22,6 @@ apps:
     valueFiles:
       - ../../environments/production/redis/values.yaml
 
-  - name: wiki
-    namespace: default
-    path: charts/core
-    valueFiles:
-      - ../../environments/production/wiki/values.yaml
-
   - name: production-rabbitmq
     namespace: rabbitmq
     path: charts/rabbitmq

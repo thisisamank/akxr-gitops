@@ -29,6 +29,18 @@ apps:
     valueFiles:
       - ../../environments/core/vault/values.yaml
 
+  - name: wiki
+    namespace: default
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/wiki/values.yaml
+
+  # - name: zulip
+  #   namespace: zulip
+  #   path: charts/zulip
+  #   valueFiles:
+  #     - ../../environments/core/zulip/values.yaml
+
   # - name: prowlarr
   #   path: charts/core
   #   valueFiles:
