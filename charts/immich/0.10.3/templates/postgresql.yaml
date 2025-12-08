@@ -1,160 +1,115 @@
-{{- if .Values.postgresql.enabled }}
-{{- $secretName := .Values.postgresql.auth.existingSecret | default (printf "%s-postgresql" .Release.Name) }}
-{{- $passwordKey := .Values.postgresql.auth.secretKeys.password | default "DB_PASSWORD" }}
-{{- if not .Values.postgresql.auth.existingSecret }}
+{{- if .Values.database.enabled }}
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-postgresql
+  name: {{ .Release.Name }}-postgresql-init
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+    app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
     app.kubernetes.io/instance: {{ .Release.Name }}
-type: Opaque
 data:
-  DB_PASSWORD: {{ .Values.postgresql.auth.password | b64enc }}
-{{- end }}
+  init-extensions.sh: |
+    #!/bin/bash
+    set -e
+    # Enable vchord in shared_preload_libraries
+    echo "shared_preload_libraries = 'vchord.so'" >> "$PGDATA/postgresql.conf"
+    # Restart to load the library
+    pg_ctl restart -D "$PGDATA" -m fast -w
+    # Now create extensions
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+      CREATE EXTENSION IF NOT EXISTS vchord CASCADE;
+      CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+    EOSQL
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-postgresql
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+    app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:
     - port: 5432
-      targetPort: 5432
+      targetPort: postgresql
       protocol: TCP
       name: postgresql
   selector:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+    app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
     app.kubernetes.io/instance: {{ .Release.Name }}
----
-{{- if .Values.postgresql.persistence.hostPath }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-postgresql-pv
-  labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
-    app.kubernetes.io/instance: {{ .Release.Name }}
-spec:
-  capacity:
-    storage: {{ .Values.postgresql.persistence.size | default "10Gi" }}
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
-  hostPath:
-    path: {{ .Values.postgresql.persistence.hostPath }}
-    type: DirectoryOrCreate
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.postgresql.persistence.node | default "talos-ute-nle" }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ .Release.Name }}-postgresql-data
-  labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
-    app.kubernetes.io/instance: {{ .Release.Name }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: ""
-  volumeName: {{ .Release.Name }}-postgresql-pv
-  resources:
-    requests:
-      storage: {{ .Values.postgresql.persistence.size | default "10Gi" }}
-{{- else if .Values.postgresql.persistence.storageClass }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ .Release.Name }}-postgresql-data
-  labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
-    app.kubernetes.io/instance: {{ .Release.Name }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
-  resources:
-    requests:
-      storage: {{ .Values.postgresql.persistence.size | default "10Gi" }}
-{{- end }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-postgresql
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+    app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   serviceName: {{ .Release.Name }}-postgresql
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+      app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ .Release.Name }}-postgresql
+        app.kubernetes.io/name: {{ .Chart.Name }}-postgresql
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      {{- with .Values.defaultPodOptions.nodeSelector }}
+      {{- with .Values.database.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.defaultPodOptions.tolerations }}
+      {{- with .Values.database.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsGroup: 999
       containers:
         - name: postgresql
-          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
-          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy | default "IfNotPresent" }}
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          imagePullPolicy: {{ .Values.database.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - containerPort: 5432
-              name: postgresql
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
           env:
+            - name: POSTGRES_USER
+              value: {{ .Values.database.auth.username | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.database.auth.database | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $secretName }}
-                  key: {{ $passwordKey }}
-            - name: POSTGRES_USER
-              value: {{ .Values.postgresql.auth.username }}
-            - name: POSTGRES_DB
-              value: {{ .Values.postgresql.auth.database }}
+                  name: {{ .Values.database.auth.existingSecret }}
+                  key: {{ .Values.database.auth.secretKeys.passwordKey | default "DB_PASSWORD" }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "scram-sha-256"
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
-          {{- with .Values.postgresql.resources }}
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          {{- with .Values.database.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.postgresql.auth.username }}
-                - -d
-                - {{ .Values.postgresql.auth.database }}
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -162,21 +117,27 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.postgresql.auth.username }}
-                - -d
-                - {{ .Values.postgresql.auth.database }}
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
       volumes:
-        - name: data
-          {{- if or .Values.postgresql.persistence.hostPath .Values.postgresql.persistence.storageClass }}
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-postgresql-data
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
+        - name: init-scripts
+          configMap:
+            name: {{ .Release.Name }}-postgresql-init
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - {{ .Values.database.persistence.accessMode | default "ReadWriteOnce" }}
+        {{- if .Values.database.persistence.storageClass }}
+        storageClassName: {{ .Values.database.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.database.persistence.size | default "10Gi" }}
 {{- end }}

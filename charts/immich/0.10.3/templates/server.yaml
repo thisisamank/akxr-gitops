@@ -101,11 +101,7 @@ persistence:
 {{- end }}
   data:
     enabled: true
-    {{- if .Values.immich.persistence.library.hostPath }}
-    existingClaim: {{ .Release.Name }}-library
-    {{- else }}
     existingClaim: {{ .Values.immich.persistence.library.existingClaim }}
-    {{- end }}
 {{- end }}
 
 {{ if .Values.server.enabled }}
