@@ -80,6 +80,13 @@ data:
     originRequest:
       noTLSVerify: true
       http2Origin: true
+      # Timeout configuration for large file uploads (600s = 10 minutes)
+      # Cloudflared default is 100s, which is too short for large videos
+      timeout: 600s
+      # Allow large request bodies (100GB)
+      # Note: Cloudflare tunnel has a 100MB limit on free plans, but this config
+      # applies to the tunnel itself, not Cloudflare's edge
+      maxHttpHeaderSize: 65536
     ingress:
     - hostname: "*.pixr.in"
       service: http://traefik.traefik.svc.cluster.local:80

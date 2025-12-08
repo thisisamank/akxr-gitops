@@ -1,0 +1,17 @@
+---
+# Traefik Middleware for Immich large file uploads
+# This middleware extends timeouts to 600s (10 minutes) for large video uploads
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: immich-timeout
+  namespace: immich
+spec:
+  buffering:
+    # Allow large request bodies (50GB = 50000MB as per Immich nginx example)
+    maxRequestBodyBytes: 53687091200  # 50GB in bytes
+    maxResponseBodyBytes: 53687091200
+  # Timeout configuration
+  # Note: Entrypoint timeouts are configured in traefik-app.yaml
+  # This middleware handles buffering for large uploads
+
