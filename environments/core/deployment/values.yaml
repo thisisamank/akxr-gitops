@@ -35,11 +35,11 @@ apps:
     valueFiles:
       - ../../environments/core/wiki/values.yaml
 
-  # - name: zulip
-  #   namespace: zulip
-  #   path: charts/zulip
-  #   valueFiles:
-  #     - ../../environments/core/zulip/values.yaml
+  - name: zulip
+    namespace: zulip
+    path: charts/zulip
+    valueFiles:
+      - ../../environments/core/zulip/values.yaml
 
   # - name: prowlarr
   #   path: charts/core
