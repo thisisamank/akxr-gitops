@@ -19,12 +19,16 @@ controllers:
         env:
           REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
-          # PostgreSQL connection
+          # PostgreSQL connection - password from sealed secret
           DB_HOSTNAME: '{{ printf "%s-postgresql" .Release.Name }}'
           DB_PORT: "5432"
           DB_DATABASE_NAME: "immich"
           DB_USERNAME: "immich"
-          DB_PASSWORD: "immich-db-internal-password"
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db-secret
+                key: DB_PASSWORD
 
 immich:
   metrics:
@@ -35,23 +39,8 @@ immich:
       hostPath: /var/mnt/media/immich
       node: talos-ute-nle
       size: 500Gi
-  # Ref: https://immich.app/docs/install/config-file/
-  configuration:
-    notifications:
-      smtp:
-        enabled: true
-        from:
-          name: "Aman"
-          address: "photos@akxr.in"
-        replyTo:
-          name: "Aman"
-          address: "aman@akxr.in"
-        transport:
-          host: "smtp-relay.brevo.com"
-          port: 587
-          username: "9c16eb001@smtp-brevo.com"
-          # Password set via admin UI after deployment
-          ignoreCert: false
+  # SMTP configured via Immich admin UI after deployment
+  configuration: {}
 
 # Bundled PostgreSQL with pgvecto.rs for vector search
 postgresql:
@@ -64,7 +53,10 @@ postgresql:
   auth:
     username: immich
     database: immich
-    password: "immich-db-internal-password"
+    # Use sealed secret - DO NOT CHANGE after first deployment
+    existingSecret: immich-db-secret
+    secretKeys:
+      password: DB_PASSWORD
   persistence:
     # Use hostPath for database storage
     hostPath: /var/mnt/media/immich-db
@@ -105,7 +97,6 @@ server:
           image:
             repository: ghcr.io/immich-app/immich-server
             pullPolicy: IfNotPresent
-          # SMTP configured via Immich admin UI after deployment
           resources:
             requests:
               cpu: 200m

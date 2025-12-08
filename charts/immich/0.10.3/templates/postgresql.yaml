@@ -1,4 +1,7 @@
 {{- if .Values.postgresql.enabled }}
+{{- $secretName := .Values.postgresql.auth.existingSecret | default (printf "%s-postgresql" .Release.Name) }}
+{{- $passwordKey := .Values.postgresql.auth.secretKeys.password | default "DB_PASSWORD" }}
+{{- if not .Values.postgresql.auth.existingSecret }}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,9 +12,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 type: Opaque
 data:
-  POSTGRES_PASSWORD: {{ .Values.postgresql.auth.password | b64enc }}
-  POSTGRES_USER: {{ .Values.postgresql.auth.username | b64enc }}
-  POSTGRES_DB: {{ .Values.postgresql.auth.database | b64enc }}
+  DB_PASSWORD: {{ .Values.postgresql.auth.password | b64enc }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -130,18 +132,12 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: POSTGRES_PASSWORD
+                  name: {{ $secretName }}
+                  key: {{ $passwordKey }}
             - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username }}
             - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database }}
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
           volumeMounts:
