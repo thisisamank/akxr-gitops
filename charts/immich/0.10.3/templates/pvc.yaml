@@ -1,0 +1,25 @@
+{{- if .Values.immich.persistence.library.create }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.immich.persistence.library.existingClaim }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- with .Values.immich.persistence.library.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.immich.persistence.library.accessMode | default "ReadWriteOnce" }}
+  {{- if .Values.immich.persistence.library.storageClass }}
+  storageClassName: {{ .Values.immich.persistence.library.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.immich.persistence.library.size | default "100Gi" }}
+{{- end }}
+
