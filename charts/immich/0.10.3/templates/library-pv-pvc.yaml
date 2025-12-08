@@ -1,0 +1,45 @@
+{{- if .Values.immich.persistence.library.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Release.Name }}-library-pv
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-library
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  capacity:
+    storage: {{ .Values.immich.persistence.library.size | default "100Gi" }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: {{ .Values.immich.persistence.library.hostPath }}
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ .Values.immich.persistence.library.node | default "talos-ute-nle" }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-library
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-library
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: {{ .Release.Name }}-library-pv
+  resources:
+    requests:
+      storage: {{ .Values.immich.persistence.library.size | default "100Gi" }}
+{{- end }}
+
