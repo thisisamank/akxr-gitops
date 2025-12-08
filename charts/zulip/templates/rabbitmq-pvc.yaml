@@ -10,6 +10,9 @@ spec:
   {{- if .Values.rabbitmq.persistence.storageClass }}
   storageClassName: {{ .Values.rabbitmq.persistence.storageClass }}
   {{- end }}
+  {{- if .Values.rabbitmq.persistence.volumeName }}
+  volumeName: {{ .Values.rabbitmq.persistence.volumeName }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.rabbitmq.persistence.size }}

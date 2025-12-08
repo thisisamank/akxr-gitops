@@ -19,6 +19,9 @@ spec:
   {{- if .Values.persistentVolumeClaim.storageClassName }}
   storageClassName: {{ .Values.persistentVolumeClaim.storageClassName }}
   {{- end }}
+  {{- if .Values.persistentVolumeClaim.volumeName }}
+  volumeName: {{ .Values.persistentVolumeClaim.volumeName }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.persistentVolumeClaim.size | default "10Gi" }}

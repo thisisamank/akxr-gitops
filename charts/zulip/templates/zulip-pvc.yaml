@@ -10,6 +10,9 @@ spec:
   {{- if .Values.zulip.persistence.storageClass }}
   storageClassName: {{ .Values.zulip.persistence.storageClass }}
   {{- end }}
+  {{- if .Values.zulip.persistence.volumeName }}
+  volumeName: {{ .Values.zulip.persistence.volumeName }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.zulip.persistence.size }}
