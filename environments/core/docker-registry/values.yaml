@@ -96,7 +96,6 @@ volumeMounts:
     readOnly: true
 
 # Health checks - use TCP to avoid HTTP 401 when auth is enabled
-# Note: Must completely override default httpGet probes to avoid merge conflicts
 livenessProbe:
   tcpSocket:
     port: 5000
@@ -104,7 +103,6 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
-  httpGet: null
 
 readinessProbe:
   tcpSocket:
@@ -113,7 +111,6 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-  httpGet: null
 
 # Control plane node placement (matches other core apps)
 nodeSelector:
