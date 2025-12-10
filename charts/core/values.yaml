@@ -166,3 +166,15 @@ tolerations:
     effect: NoSchedule
 
 affinity: {}
+
+# Traefik Middleware configuration
+middleware:
+  enabled: false
+  stripPrefix:
+    enabled: false
+    prefixes: []
+  # Example:
+  # stripPrefix:
+  #   enabled: true
+  #   prefixes:
+  #     - /ui
