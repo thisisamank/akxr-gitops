@@ -47,6 +47,12 @@ apps:
     valueFiles:
       - ../../../environments/core/immich/values.yaml
 
+  - name: docker-registry
+    namespace: default
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/docker-registry/values.yaml
+
   # - name: prowlarr
   #   path: charts/core
   #   valueFiles:
