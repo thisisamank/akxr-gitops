@@ -62,11 +62,39 @@ spec:
           {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
-            {{- toYaml . | nindent 12 }}
+            {{- $probe := dict }}
+            {{- $hasTcpSocket := false }}
+            {{- range $key, $value := . }}
+              {{- if eq $key "tcpSocket" }}
+                {{- $hasTcpSocket = true }}
+              {{- end }}
+            {{- end }}
+            {{- range $key, $value := . }}
+              {{- if ne $key "httpGet" }}
+                {{- $_ := set $probe $key $value }}
+              {{- else if not $hasTcpSocket }}
+                {{- $_ := set $probe $key $value }}
+              {{- end }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- with .Values.readinessProbe }}
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
+            {{- $probe := dict }}
+            {{- $hasTcpSocket := false }}
+            {{- range $key, $value := . }}
+              {{- if eq $key "tcpSocket" }}
+                {{- $hasTcpSocket = true }}
+              {{- end }}
+            {{- end }}
+            {{- range $key, $value := . }}
+              {{- if ne $key "httpGet" }}
+                {{- $_ := set $probe $key $value }}
+              {{- else if not $hasTcpSocket }}
+                {{- $_ := set $probe $key $value }}
+              {{- end }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- with .Values.resources }}
           resources:
