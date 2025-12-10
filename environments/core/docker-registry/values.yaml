@@ -62,6 +62,11 @@ env:
     value: "true"
   - name: REGISTRY_HTTP_HOST
     value: https://registry.pixr.in
+  - name: REGISTRY_HTTP_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: docker-registry-auth
+        key: http-secret
   - name: REGISTRY_AUTH_HTPASSWD_REALM
     value: "Registry Realm"
   - name: REGISTRY_AUTH_HTPASSWD_PATH
@@ -90,10 +95,9 @@ volumeMounts:
     mountPath: /auth
     readOnly: true
 
-# Health checks - use HTTP with auth bypass for /v2/ endpoint
+# Health checks - use TCP to avoid HTTP 401 when auth is enabled
 livenessProbe:
-  httpGet:
-    path: /v2/
+  tcpSocket:
     port: 5000
   initialDelaySeconds: 30
   periodSeconds: 10
@@ -101,8 +105,7 @@ livenessProbe:
   failureThreshold: 3
 
 readinessProbe:
-  httpGet:
-    path: /v2/
+  tcpSocket:
     port: 5000
   initialDelaySeconds: 10
   periodSeconds: 5
