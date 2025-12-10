@@ -3,6 +3,8 @@ image:
   tag: "2.8.2"
   pullPolicy: Always
 
+replicaCount: 1
+
 service:
   type: ClusterIP
   port: 5000
@@ -27,6 +29,7 @@ resources:
     cpu: 100m
     memory: 128Mi
   limits:
+    cpu: 500m
     memory: 512Mi
 
 # Pod labels and annotations
@@ -36,6 +39,18 @@ podLabels:
 
 podAnnotations:
   description: "Self-hosted Docker registry"
+
+# Security context - registry image runs as root by default, but we set fsGroup for volume permissions
+podSecurityContext:
+  fsGroup: 0
+
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 
 # Environment variables for Docker registry
 env:
@@ -51,14 +66,18 @@ env:
     value: "Registry Realm"
   - name: REGISTRY_AUTH_HTPASSWD_PATH
     value: /auth/htpasswd
-  # - name: REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR
-  #   value: inmemory
 
+# Use PVC instead of hostPath for production-grade storage
+persistentVolumeClaim:
+  enabled: true
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 50Gi
+  mountPath: /var/lib/registry
+
+# Additional volumes for auth secret
 volumes:
-  - name: registry-data
-    hostPath:
-      path: /home/thisisamank/registry
-      type: Directory
   - name: registry-auth
     secret:
       secretName: docker-registry-auth
@@ -67,30 +86,34 @@ volumes:
           path: htpasswd
 
 volumeMounts:
-  - name: registry-data
-    mountPath: /var/lib/registry
   - name: registry-auth
     mountPath: /auth
     readOnly: true
 
-securityContext:
-  runAsUser: 0
-  runAsGroup: 0
-  fsGroup: 0
+# Health checks - use HTTP with auth bypass for /v2/ endpoint
+livenessProbe:
+  httpGet:
+    path: /v2/
+    port: 5000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 
-# Health checks (use TCP to avoid HTTP 401 when auth is enabled)
-livenessProbe: null
-  # tcpSocket:
-  #   port: 5000
-  # initialDelaySeconds: 30
-  # periodSeconds: 10
-  # timeoutSeconds: 5
-  # failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /v2/
+    port: 5000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
 
-readinessProbe: null
-  # tcpSocket:
-  #   port: 5000
-  # initialDelaySeconds: 5
-  # periodSeconds: 5
-  # timeoutSeconds: 3
-  # failureThreshold: 3
+# Control plane node placement (matches other core apps)
+nodeSelector:
+  kubernetes.io/hostname: talos-ute-nle
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
