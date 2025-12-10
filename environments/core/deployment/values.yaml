@@ -53,6 +53,12 @@ apps:
     valueFiles:
       - ../../environments/core/docker-registry/values.yaml
 
+  - name: docker-registry-ui
+    namespace: default
+    path: charts/core
+    valueFiles:
+      - ../../environments/core/docker-registry-ui/values.yaml
+
   # - name: prowlarr
   #   path: charts/core
   #   valueFiles:
