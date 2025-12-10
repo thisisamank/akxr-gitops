@@ -14,6 +14,7 @@ ingress:
   className: "traefik"
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: default-docker-registry-ui-app-stripprefix@kubernetescrd
   hosts:
     - host: registry.pixr.in
       paths:
@@ -23,6 +24,14 @@ ingress:
     - secretName: nexus-tls-prod
       hosts:
         - registry.pixr.in
+
+# Traefik middleware to strip /ui prefix
+middleware:
+  enabled: true
+  stripPrefix:
+    enabled: true
+    prefixes:
+      - /ui
 
 resources:
   requests:
@@ -43,7 +52,11 @@ podAnnotations:
 env:
   - name: REGISTRY_TITLE
     value: "Pixr Docker Registry"
+  # Use path relative to UI base path - browser calls /ui/v2/... which goes through UI proxy
   - name: REGISTRY_URL
+    value: /ui/v2
+  # Enable proxy mode to avoid CORS issues - UI will proxy requests through nginx
+  - name: NGINX_PROXY_PASS_URL
     value: https://registry.pixr.in
   - name: DELETE_IMAGES
     value: "true"

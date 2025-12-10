@@ -1,0 +1,18 @@
+{{- if .Values.middleware.enabled }}
+{{- if .Values.middleware.stripPrefix.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "app.fullname" . }}-stripprefix
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      {{- range .Values.middleware.stripPrefix.prefixes }}
+      - {{ . }}
+      {{- end }}
+{{- end }}
+{{- end }}
+
