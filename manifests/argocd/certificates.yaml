@@ -22,6 +22,7 @@ spec:
   - 'ntfy.pixr.in'
   - 'auth.pixr.in'
   - 'registry.pixr.in'
+  - 'registry-ui.pixr.in'
   - 'longhorn.pixr.in'
   - 'speedtest.pixr.in'
   - 'wiki.pixr.in'

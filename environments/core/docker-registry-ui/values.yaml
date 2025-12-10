@@ -14,24 +14,19 @@ ingress:
   className: "traefik"
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
-    traefik.ingress.kubernetes.io/router.middlewares: default-docker-registry-ui-app-stripprefix@kubernetescrd
   hosts:
-    - host: registry.pixr.in
+    - host: registry-ui.pixr.in
       paths:
-        - path: /ui
+        - path: /
           pathType: Prefix
   tls:
     - secretName: nexus-tls-prod
       hosts:
-        - registry.pixr.in
+        - registry-ui.pixr.in
 
-# Traefik middleware to strip /ui prefix
+# No middleware needed - serving at root path on separate domain
 middleware:
-  enabled: true
-  stripPrefix:
-    enabled: true
-    prefixes:
-      - /ui
+  enabled: false
 
 resources:
   requests:
@@ -52,9 +47,10 @@ podAnnotations:
 env:
   - name: REGISTRY_TITLE
     value: "Pixr Docker Registry"
-  # Use path relative to UI base path - browser calls /ui/v2/... which goes through UI proxy
+  # Use relative path - UI will call /v2/... which nginx proxies to registry
+  # This avoids CORS since all requests go through the UI's nginx
   - name: REGISTRY_URL
-    value: /ui/v2
+    value: /v2
   # Enable proxy mode to avoid CORS issues - UI will proxy requests through nginx
   - name: NGINX_PROXY_PASS_URL
     value: https://registry.pixr.in
