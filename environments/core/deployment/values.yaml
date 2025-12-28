@@ -53,12 +53,13 @@ apps:
     valueFiles:
       - ../../environments/core/docker-registry/values.yaml
 
-  - name: docker-registry-ui
+  
+  - name: karakeep
     namespace: default
-    path: charts/core
+    path: charts/karakeep/0.27.0
     valueFiles:
-      - ../../environments/core/docker-registry-ui/values.yaml
-
+      - ../../environments/core/karakeep/values.yaml
+      
   # - name: prowlarr
   #   path: charts/core
   #   valueFiles:
