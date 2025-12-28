@@ -33,6 +33,8 @@ controllers:
               name: "{{ .Release.Name }}"
           - secretRef:
               name: "{{ .Release.Name }}-meilesearch"
+          - secretRef:
+              name: "openai"
           
         probes:
           liveness:
