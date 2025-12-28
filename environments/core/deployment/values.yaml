@@ -58,8 +58,8 @@ apps:
     namespace: default
     path: charts/karakeep/0.27.0
     valueFiles:
-      - ../../environments/core/karakeep/values.yaml
-      
+      - ../../../environments/core/karakeep/values.yaml
+
   # - name: prowlarr
   #   path: charts/core
   #   valueFiles:
