@@ -1,7 +1,5 @@
 applicationProtocol: http
 applicationHost: bookmark.pixr.in
-applicationSecretKey: ~
-meilisearchMasterKey: ~
 
 defaultPodOptions:
   nodeSelector:
@@ -30,11 +28,9 @@ controllers:
 
         envFrom:
           - secretRef:
-              name: "{{ .Release.Name }}"
-          - secretRef:
-              name: "{{ .Release.Name }}-meilesearch"
-          - secretRef:
               name: "openai"
+          - secretRef:
+              name: "karakeep-env"
           
         probes:
           liveness:
@@ -123,13 +119,9 @@ service:
 
 secrets:
   karakeep:
-    enabled: true
-    stringData:
-      NEXTAUTH_SECRET: "{{ default (randAlphaNum 48) .Values.applicationSecretKey }}"
+    enabled: false
   meilesearch:
-    enabled: true
-    stringData:
-      MEILI_MASTER_KEY: "{{ default (randAlphaNum 30) .Values.meilisearchMasterKey }}"
+    enabled: false
 
 ingress:
   karakeep:
@@ -153,7 +145,7 @@ persistence:
 
 meilisearch:
   auth:
-    existingMasterKeySecret: "{{ .Release.Name }}-meilesearch"
+    existingMasterKeySecret: "karakeep-env"
   environment:
     MEILI_ENV: production
   persistence:
