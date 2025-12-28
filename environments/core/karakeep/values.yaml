@@ -3,6 +3,16 @@ applicationHost: bookmark.pixr.in
 applicationSecretKey: ~
 meilisearchMasterKey: ~
 
+defaultPodOptions:
+  nodeSelector:
+    kubernetes.io/hostname: talos-ute-nle
+
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+
+
 controllers:
   karakeep:
     type: statefulset
@@ -40,7 +50,7 @@ controllers:
               httpGet:
                 path: /api/health
                 port: 3000
-
+                
     statefulset:
       volumeClaimTemplates:
         - name: data
@@ -146,3 +156,10 @@ meilisearch:
   persistence:
     enabled: true
     size: 1Gi
+  nodeSelector:
+    kubernetes.io/hostname: talos-ute-nle
+
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
