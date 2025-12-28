@@ -6,7 +6,6 @@ meilisearchMasterKey: ~
 defaultPodOptions:
   nodeSelector:
     kubernetes.io/hostname: talos-ute-nle
-
   tolerations:
     - key: node-role.kubernetes.io/control-plane
       operator: Exists
@@ -73,6 +72,8 @@ controllers:
           - --hide-scrollbars
           - --disable-gpu
           - --disable-dev-shm-usage
+          - --no-sandbox
+          - --disable-setuid-sandbox
 
         probes:
           liveness:
