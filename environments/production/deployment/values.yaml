@@ -33,9 +33,3 @@ apps:
     path: charts/cronjob
     valueFiles:
       - ../../environments/production/daily-updates-bot/values.yaml
-
-  - name: production-ghost
-    namespace: default
-    path: charts/ghost
-    valueFiles:
-      - ../../environments/production/ghost/values.yaml
