@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ghost.fullname" . }}
+  labels:
+    {{- include "ghost.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ghost.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ghost.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ghost.selectorLabels" . | nindent 8 }}
+    spec:
+      # Init containers: wait for MySQL, then set up permissions
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL to be ready..."
+              until nc -z {{ include "ghost.fullname" . }}-mysql 3306; do
+                echo "MySQL not ready, waiting..."
+                sleep 2
+              done
+              echo "MySQL is ready!"
+        - name: init-ghost-content
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              export DIRS='files logs apps themes data public settings images media'
+              echo 'Check if base dirs exists, if not, create them'
+              echo "Directories to check: $DIRS"
+              for dir in $DIRS; do
+                if [ ! -d /home/nonroot/app/ghost/content/$dir ]; then
+                  echo "Creating /home/nonroot/app/ghost/content/$dir directory"
+                  mkdir -pv /home/nonroot/app/ghost/content/$dir || echo "Error creating /home/nonroot/app/ghost/content/$dir directory"
+                fi
+                chown -Rfv 65532:65532 /home/nonroot/app/ghost/content/$dir && echo "chown ok on $dir" || echo "Error changing ownership of /home/nonroot/app/ghost/content/$dir directory"
+              done
+              # Ensure public directory and subdirectories exist with proper permissions
+              mkdir -pv /home/nonroot/app/ghost/content/public/admin-auth
+              chmod -v 755 /home/nonroot/app/ghost/content/public
+              chown -Rfv 65532:65532 /home/nonroot/app/ghost/content/public
+              exit 0
+          volumeMounts:
+            - name: ghost-content
+              mountPath: /home/nonroot/app/ghost/content
+          securityContext:
+            runAsUser: 0
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+        - name: init-ghost-config
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache gettext > /dev/null 2>&1
+              envsubst < /config/config.production.json > /output/config.production.json
+              echo "Config file processed successfully"
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ghost.mysqlExistingSecret }}
+                  key: mysql-password
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ghost.existingSecret }}
+                  key: smtp-password
+          volumeMounts:
+            - name: ghost-config
+              mountPath: /config
+              readOnly: true
+            - name: ghost-config-processed
+              mountPath: /output
+          securityContext:
+            runAsUser: 0
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+      containers:
+        - name: ghost
+          image: "{{ .Values.ghost.image.repository }}:{{ .Values.ghost.image.tag }}"
+          imagePullPolicy: {{ .Values.ghost.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 2368
+              protocol: TCP
+          env:
+            # Environment
+            - name: NODE_ENV
+              value: "production"
+            # Trust proxy headers from Traefik (X-Forwarded-Proto, etc.)
+            # Express expects this to be "true" (string) or "1" to trust all proxies
+            - name: TRUST_PROXY
+              value: "1"
+            # Database password for config file substitution
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ghost.mysqlExistingSecret }}
+                  key: mysql-password
+            # SMTP password for config file substitution
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ghost.existingSecret }}
+                  key: smtp-password
+            # Ghost admin password (used during initial setup via entrypoint)
+            - name: GHOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ghost.existingSecret }}
+                  key: ghost-password
+          volumeMounts:
+            - name: ghost-content
+              mountPath: /home/nonroot/app/ghost/content
+              readOnly: false
+            - name: ghost-content
+              mountPath: /home/nonroot/app/ghost/versions/6.10.3/content
+              readOnly: false
+            - name: ghost-config-processed
+              readOnly: true
+              mountPath: /home/nonroot/app/ghost/config.production.json
+              subPath: config.production.json
+            - name: tmp
+              mountPath: /tmp
+              readOnly: false
+          resources:
+            {{- toYaml .Values.ghost.resources | nindent 12 }}
+          {{- if .Values.ghost.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.ghost.startupProbe | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.ghost.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.ghost.readinessProbe | nindent 12 }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: ghost-content
+          persistentVolumeClaim:
+            claimName: {{ include "ghost.fullname" . }}-content
+        - name: ghost-config
+          secret:
+            secretName: {{ include "ghost.fullname" . }}-config
+            defaultMode: 420
+        - name: ghost-config-processed
+          emptyDir:
+            sizeLimit: 1Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
