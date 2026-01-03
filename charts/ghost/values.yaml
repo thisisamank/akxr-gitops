@@ -1,11 +1,11 @@
-nodeSelector:
-  node-type: prod
+# Ghost Helm Chart Default Values
 
-tolerations:
-  - key: node
-    operator: Equal
-    value: prod
-    effect: NoSchedule
+nameOverride: ""
+fullnameOverride: ""
+
+# Node placement
+nodeSelector: {}
+tolerations: []
 
 # Ghost application
 ghost:
@@ -16,18 +16,19 @@ ghost:
     tag: "latest"
     pullPolicy: IfNotPresent
 
-  url: "https://blog.akxr.in/"
+  # Ghost URL (required - must be a valid TLD for production)
+  url: "https://blog.example.com"
 
-  # Use existing sealed secrets
+  # Use existing secrets instead of creating ones
   existingSecret: "ghost-secret"
   mysqlExistingSecret: "mysql-ghost-secret"
 
-  # SMTP configuration (Brevo)
+  # SMTP configuration (host/user/port in values, password in secret)
   smtp:
-    host: "smtp-relay.brevo.com"
-    user: "9c16eb001@smtp-brevo.com"
+    host: "smtp.example.com"
+    user: "user@example.com"
     port: "587"
-    from: "noreply@akxr.in"
+    from: "noreply@example.com"
     secure: true
 
   service:
@@ -35,23 +36,20 @@ ghost:
     port: 2368
 
   ingress:
-    enabled: true
-    className: "traefik"
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web
+    enabled: false
+    className: ""
+    annotations: {}
     hosts:
-      - host: blog.akxr.in
+      - host: blog.example.com
         paths:
           - path: /
             pathType: Prefix
-    tls:
-      - secretName: nexus-tls-prod
-        hosts:
-          - blog.akxr.in
+    tls: []
 
   persistence:
-    size: 20Gi
-    storageClass: "longhorn"
+    size: 10Gi
+    storageClass: ""
+    volumeName: ""
 
   resources:
     requests:
@@ -96,10 +94,11 @@ mysql:
   auth:
     database: ghost
     username: ghost_user
+    rootPassword: ""
 
   persistence:
-    size: 20Gi
-    storageClass: "longhorn"
+    size: 10Gi
+    storageClass: ""
 
   resources:
     requests:
@@ -132,3 +131,4 @@ mysql:
     periodSeconds: 5
     timeoutSeconds: 3
     failureThreshold: 3
+

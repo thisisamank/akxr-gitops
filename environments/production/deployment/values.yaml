@@ -34,8 +34,8 @@ apps:
     valueFiles:
       - ../../environments/production/daily-updates-bot/values.yaml
 
-  - name: ghost
+  - name: production-ghost
     namespace: default
-    path: charts/ghost/25.0.4
+    path: charts/ghost
     valueFiles:
-      - ../../../environments/production/ghost/values.yaml
+      - ../../environments/production/ghost/values.yaml
