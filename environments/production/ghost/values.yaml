@@ -4,9 +4,10 @@ clusterDomain: blog.akxr.in
 image:
   registry: docker.io
   # Using bitnamilegacy as Bitnami images moved to legacy repo (Aug 2025)
+  # Trying 6.0.4 instead of 6.0.5 due to setup crash issue
   # Chart version 25.0.4 expects bitnami/ghost:6.0.5-debian-12-r0
   repository: bitnamilegacy/ghost
-  tag: 6.0.5-debian-12-r0
+  tag: 6.0.4-debian-12-r0
   pullPolicy: IfNotPresent
 
 ghostUsername: akxr
@@ -21,10 +22,14 @@ ghostEnableHttps: true
 smtpHost: "smtp-relay.brevo.com"
 smtpPort: "587"
 smtpUser: "9c16eb001@smtp-brevo.com"
-smtpPassword: ""
+# smtpPassword must be non-empty to trigger SMTP password env var (even if using existingSecret)
+# The chart uses existingSecret (not smtpExistingSecret) for the secret reference
+smtpPassword: "dummy"
 smtpService: ""
 smtpProtocol: "tls"
-smtpExistingSecret: "ghost-secret"
+# Note: Chart uses existingSecret for SMTP password, not smtpExistingSecret
+# Both ghost-password and smtp-password should be in the same secret
+smtpExistingSecret: ""
 
 allowEmptyPassword: false
 ghostSkipInstall: false
@@ -50,6 +55,34 @@ resources:
   limits:
     cpu: "2000m"
     memory: "1024Mi"
+
+# Startup probe - Ghost can take 5-10 minutes to initialize on first run
+# This allows Ghost to complete database setup and installation
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 10
+  failureThreshold: 40
+  successThreshold: 1
+
+# Liveness probe - wait longer before checking if Ghost is alive
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Readiness probe - wait before marking Ghost as ready
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
 
 containerPorts:
   http: 2368
