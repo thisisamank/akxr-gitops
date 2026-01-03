@@ -1,0 +1,193 @@
+
+clusterDomain: blog.akxr.in
+
+image:
+  registry: docker.io
+  # Using bitnamilegacy as Bitnami images moved to legacy repo (Aug 2025)
+  # Chart version 25.0.4 expects bitnami/ghost:6.0.5-debian-12-r0
+  repository: bitnamilegacy/ghost
+  tag: 6.0.5-debian-12-r0
+  pullPolicy: IfNotPresent
+
+ghostUsername: akxr
+ghostPassword: ""
+existingSecret: "ghost-secret"
+ghostEmail: aman@akxr.in
+ghostBlogTitle: akxr's blog
+ghostHost: blog.akxr.in
+ghostPath: /
+ghostEnableHttps: true
+
+smtpHost: "smtp-relay.brevo.com"
+smtpPort: "587"
+smtpUser: "9c16eb001@smtp-brevo.com"
+smtpPassword: ""
+smtpService: ""
+smtpProtocol: "tls"
+smtpExistingSecret: "ghost-secret"
+
+allowEmptyPassword: false
+ghostSkipInstall: false
+command: []
+args: []
+extraEnvVars: []
+
+replicaCount: 1
+
+nodeSelector:
+  node-type: prod
+
+tolerations:
+  - key: node
+    operator: Equal
+    value: prod
+    effect: NoSchedule
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "512Mi"
+  limits:
+    cpu: "2000m"
+    memory: "1024Mi"
+
+containerPorts:
+  http: 2368
+  https: 2368
+
+service:
+  type: LoadBalancer
+  port: 80
+  ports:
+    http: 80
+    https: 443
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: blog.akxr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - blog.akxr.in
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+
+volumePermissions:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/os-shell
+    tag: 12-debian-12-r51
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+  securityContext:
+    seLinuxOptions: {}
+    runAsUser: 0
+
+mysql:
+  enabled: true
+  architecture: standalone
+  # Override MySQL image to use bitnamilegacy (Bitnami images moved Aug 2025)
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/mysql
+    tag: 9.4.0-debian-12-r1
+    pullPolicy: IfNotPresent
+  # Override MySQL volumePermissions image (use same tag as Ghost volumePermissions)
+  volumePermissions:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/os-shell
+      tag: 12-debian-12-r51
+      pullPolicy: IfNotPresent
+  auth:
+    rootPassword: ""
+    database: ghost_prod
+    username: ghost_user
+    password: ""
+    existingSecret: "mysql-ghost-secret"
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "longhorn"
+      accessModes:
+        - ReadWriteOnce
+      size: 10Gi
+    resourcesPreset: ""
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "2Gi"
+    # Startup probe configuration - MySQL can take time to initialize, especially with volume permissions
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+      successThreshold: 1
+    # Liveness and readiness probes
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+    nodeSelector:
+      node-type: prod
+    tolerations:
+      - key: node
+        operator: Equal
+        value: prod
+        effect: NoSchedule
+
+externalDatabase:
+  host: localhost
+  port: 3306
+  user: bn_ghost
+  password: ""
+  database: bitnami_ghost
+  existingSecret: ""
+  ssl: false
+  sslCaFile: ""
+
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+  extraIngress: []
+  extraEgress: []
+  ingressNSMatchLabels: {}
+  ingressNSPodMatchLabels: {}
+
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+  annotations: {}
