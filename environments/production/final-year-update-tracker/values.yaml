@@ -1,0 +1,58 @@
+# Daily Updates Bot CronJob Configuration
+
+# CronJob schedule - Every day at 5 PM IST
+schedule: "0 17 * * *"
+timeZone: "Asia/Kolkata"
+
+# Job history limits
+successfulJobsHistoryLimit: 1
+failedJobsHistoryLimit: 1
+
+# Image configuration
+image:
+  repository: registry.pixr.in/final-year-update-tracker
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Working directory
+workingDir: /update-tracker/final-year
+
+# Resource limits
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+# Restart policy
+restartPolicy: OnFailure
+
+# Volume mounts - secret mounted at /root
+volumeMounts:
+  - name: update-tracker-config
+    mountPath: /root
+    readOnly: true
+
+# Volumes - secret reference
+volumes:
+  - name: update-tracker-config
+    secret:
+      secretName: update-tracker-config
+
+# Pod labels
+podLabels:
+  app: update-tracker
+
+# Node selector for production nodes
+nodeSelector:
+  node-type: prod
+
+# Tolerations for production node taints
+tolerations:
+  - key: node
+    operator: Equal
+    value: prod
+    effect: NoSchedule
+
