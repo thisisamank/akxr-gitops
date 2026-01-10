@@ -33,3 +33,9 @@ apps:
     path: charts/cronjob
     valueFiles:
       - ../../environments/production/daily-updates-bot/values.yaml
+
+  - name: final-year-update-tracker
+    namespace: default
+    path: charts/cronjob
+    valueFiles:
+      - ../../environments/production/final-year-update-tracker/values.yaml

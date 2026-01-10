@@ -20,7 +20,7 @@ data:
       addr: :5000
       headers:
         X-Content-Type-Options: [nosniff]
-      secret: ${REGISTRY_HTTP_SECRET}
+      # Note: secret should be set via REGISTRY_HTTP_SECRET env var, not in config.yml
     auth:
       htpasswd:
         realm: Registry Realm
