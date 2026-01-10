@@ -81,7 +81,7 @@ persistentVolumeClaim:
   size: 50Gi
   mountPath: /var/lib/registry
 
-# Additional volumes for auth secret
+# Additional volumes for auth secret and config
 volumes:
   - name: registry-auth
     secret:
@@ -89,10 +89,16 @@ volumes:
       items:
         - key: htpasswd
           path: htpasswd
+  - name: registry-config
+    configMap:
+      name: docker-registry-config
 
 volumeMounts:
   - name: registry-auth
     mountPath: /auth
+    readOnly: true
+  - name: registry-config
+    mountPath: /etc/docker/registry
     readOnly: true
 
 # Health checks - use TCP to avoid HTTP 401 when auth is enabled
