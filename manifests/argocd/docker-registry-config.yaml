@@ -20,6 +20,7 @@ data:
       addr: :5000
       headers:
         X-Content-Type-Options: [nosniff]
+      secret: ${REGISTRY_HTTP_SECRET}
     auth:
       htpasswd:
         realm: Registry Realm
