@@ -98,7 +98,8 @@ volumeMounts:
     mountPath: /auth
     readOnly: true
   - name: registry-config
-    mountPath: /etc/docker/registry
+    mountPath: /etc/docker/registry/config.yml
+    subPath: config.yml
     readOnly: true
 
 # Health checks - use TCP to avoid HTTP 401 when auth is enabled
