@@ -14,8 +14,49 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
-# Working directory
-workingDir: /update-tracker/final-year
+# Image pull secrets for private registry authentication
+imagePullSecrets:
+  - name: registry-pull-secret
+
+workingDir: /app
+
+# Environment variables loaded from secret
+env:
+  - name: ZULIP_SITE
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: ZULIP_SITE
+  - name: ZULIP_EMAIL
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: ZULIP_EMAIL
+  - name: ZULIP_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: ZULIP_API_KEY
+  - name: ZULIP_CHANNEL
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: ZULIP_CHANNEL
+  - name: ZULIP_TOPIC
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: ZULIP_TOPIC
+  - name: GSHEET_ID
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: GSHEET_ID
+  - name: GOOGLE_CREDS
+    valueFrom:
+      secretKeyRef:
+        name: update-tracker-config
+        key: GOOGLE_CREDS
 
 # Resource limits
 resources:
@@ -28,18 +69,6 @@ resources:
 
 # Restart policy
 restartPolicy: OnFailure
-
-# Volume mounts - secret mounted at /root
-volumeMounts:
-  - name: update-tracker-config
-    mountPath: /root
-    readOnly: true
-
-# Volumes - secret reference
-volumes:
-  - name: update-tracker-config
-    secret:
-      secretName: update-tracker-config
 
 # Pod labels
 podLabels:

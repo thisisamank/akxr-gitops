@@ -79,6 +79,10 @@ spec:
               args:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
+              {{- with .Values.envFrom }}
+              envFrom:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
               {{- with .Values.env }}
               env:
                 {{- toYaml . | nindent 16 }}
