@@ -1,0 +1,124 @@
+
+image:
+  tag: "2.4.1"
+
+# Database configuration - using existing staging PostgreSQL
+main:
+  config:
+    # Ensure n8n binds to all interfaces (required for K8s probes)
+    n8n:
+      host: 0.0.0.0
+      port: 5678
+    db:
+      type: postgresdb
+      postgresdb:
+        host: staging-postgresql.postgres.svc.cluster.local
+        port: 5432
+        database: akxr-staging
+        user: akxr
+
+  secret: {}
+
+  # Reference secrets via extraEnv (n8n chart converts these to env vars)
+  # Note: Chart converts db.postgresdb.password -> DB_POSTGRESDB_PASSWORD
+  # IMPORTANT: extraEnv values must be wrapped in valueFrom for secretKeyRef
+  extraEnv:
+    DB_POSTGRESDB_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: n8n-staging-secret
+          key: DB_POSTGRESDB_PASSWORD
+    # Encryption key
+    N8N_ENCRYPTION_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: n8n-staging-secret
+          key: N8N_ENCRYPTION_KEY
+    # Enforce file permissions
+    N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
+      value: "true"
+    # SMTP Configuration (Brevo)
+    N8N_EMAIL_MODE:
+      value: "smtp"
+    N8N_SMTP_HOST:
+      value: "smtp-relay.brevo.com"
+    N8N_SMTP_PORT:
+      value: "587"
+    N8N_SMTP_SECURE:
+      value: "false"
+    N8N_SMTP_USER:
+      valueFrom:
+        secretKeyRef:
+          name: n8n-staging-secret
+          key: SMTP_USERNAME
+    N8N_SMTP_PASS:
+      valueFrom:
+        secretKeyRef:
+          name: n8n-staging-secret
+          key: SMTP_PASSWORD
+
+  # Persistence for workflow data
+  persistence:
+    enabled: true
+    type: dynamic
+    storageClass: longhorn
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+
+  # Resources
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Readiness probe - n8n can take time to start, especially on first run
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+  # Liveness probe
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # Node placement for staging
+  nodeSelector:
+    node-type: staging
+  tolerations:
+    - key: node
+      operator: Equal
+      value: staging
+      effect: NoSchedule
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: n8n-staging.akxr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Disable bundled Valkey/Redis - using existing Redis if needed
+valkey:
+  enabled: false
+

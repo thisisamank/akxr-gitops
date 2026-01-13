@@ -33,3 +33,9 @@ apps:
     path: charts/immich/0.10.3
     valueFiles:
       - ../../../environments/staging/immich/values.yaml
+
+  - name: staging-n8n
+    namespace: default
+    path: charts/n8n/2.0.1
+    valueFiles:
+      - ../../../environments/staging/n8n/values.yaml
