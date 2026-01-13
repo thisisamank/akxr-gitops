@@ -52,11 +52,15 @@ data:
 EOF
 )
 
-while IFS= read -r line; do
+while IFS= read -r line || [ -n "$line" ]; do
     [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
 
-    key=$(echo "$line" | cut -d ':' -f 1 | sed 's/^[ \t]*//;s/[ \t]*$//')
-    value=$(echo "$line" | cut -d ':' -f 2- | sed 's/^[ \t]*//;s/[ \t]*$//')
+    key=$(echo "$line" | cut -d ':' -f 1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    value=$(echo "$line" | cut -d ':' -f 2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Strip surrounding single or double quotes if present (but only if they match)
+    if [[ "$value" =~ ^\'.*\'$ ]] || [[ "$value" =~ ^\".*\"$ ]]; then
+        value=$(echo "$value" | sed "s/^['\"]\(.*\)['\"]\$/\1/")
+    fi
 
     if [ -z "$key" ]; then
         echo "Warning: Skipping malformed line: $line" >&2
