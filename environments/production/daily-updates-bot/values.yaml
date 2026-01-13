@@ -11,7 +11,7 @@ failedJobsHistoryLimit: 1
 # Image configuration
 image:
   repository: thisisyashgarg/daily-updates-bot
-  tag: "41f6eb7"
+  tag: "2e518b2"
   pullPolicy: IfNotPresent
 
 # Working directory
