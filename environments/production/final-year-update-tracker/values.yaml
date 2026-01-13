@@ -1,7 +1,7 @@
 # Daily Updates Bot CronJob Configuration
 
-# CronJob schedule - Every day at 5 PM IST
-schedule: "0 17 * * *"
+# CronJob schedule - Every day at 11:55 PM IST
+schedule: "55 23 * * *"
 timeZone: "Asia/Kolkata"
 
 # Job history limits
@@ -11,7 +11,7 @@ failedJobsHistoryLimit: 1
 # Image configuration
 image:
   repository: registry.pixr.in/final-year-update-tracker
-  tag: "latest"
+  tag: "56fab30"
   pullPolicy: IfNotPresent
 
 # Image pull secrets for private registry authentication
