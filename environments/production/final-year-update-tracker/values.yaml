@@ -11,7 +11,7 @@ failedJobsHistoryLimit: 1
 # Image configuration
 image:
   repository: registry.pixr.in/final-year-update-tracker
-  tag: "56fab30"
+  tag: "dcdc5e0"
   pullPolicy: IfNotPresent
 
 # Image pull secrets for private registry authentication
