@@ -1,7 +1,7 @@
 # Daily Updates Bot CronJob Configuration
 
-# CronJob schedule - Every day at 11:55 PM IST
-schedule: "55 23 * * *"
+# CronJob schedule - 4 times daily at 20:00, 21:00, 22:00, 23:00 IST (8pm, 9pm, 10pm, 11pm)
+schedule: "0 20,21,22,23 * * *"
 timeZone: "Asia/Kolkata"
 
 # Job history limits
