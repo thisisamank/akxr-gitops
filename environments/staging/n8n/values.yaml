@@ -37,6 +37,9 @@ main:
     # Enforce file permissions
     N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
       value: "true"
+    # Webhook URL for external triggers (Telegram, etc.)
+    WEBHOOK_URL:
+      value: "https://n8n-staging.akxr.in"
     # SMTP Configuration (Brevo)
     N8N_EMAIL_MODE:
       value: "smtp"
