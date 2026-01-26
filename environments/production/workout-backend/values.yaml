@@ -1,6 +1,6 @@
 image:
   repository: registry.pixr.in/workout-backend
-  tag: "latest"
+  tag: "def8fa8"
   pullPolicy: Always
 
 replicaCount: 1
