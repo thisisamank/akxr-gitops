@@ -1,0 +1,94 @@
+image:
+  repository: registry.pixr.in/workout-backend
+  tag: "def8fa8"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: registry-pull-secret
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: workout-api.pixr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - workout-api.pixr.in
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Environment variables
+env:
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: workout-backend-secrets
+        key: database-url
+  - name: SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: workout-backend-secrets
+        key: secret-key
+  - name: ALGORITHM
+    value: "HS256"
+  - name: ACCESS_TOKEN_EXPIRE_MINUTES
+    value: "30"
+  - name: REFRESH_TOKEN_EXPIRE_DAYS
+    value: "7"
+  - name: CORS_ORIGINS
+    value: "*"
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Pod configuration
+podLabels:
+  app: workout-backend
+  tier: api
+
+podAnnotations:
+  description: "Workout tracking API backend"
+
+# Node selection for production nodes
+nodeSelector:
+  node-type: prod
+
+tolerations:
+  - key: node
+    operator: Equal
+    value: prod
+    effect: NoSchedule

@@ -39,3 +39,8 @@ apps:
     path: charts/cronjob
     valueFiles:
       - ../../environments/production/final-year-update-tracker/values.yaml
+
+  - name: workout-tracker
+    path: charts/production
+    valueFiles:
+      - ../../environments/production/workout-backend/values.yaml
