@@ -41,12 +41,6 @@ apps:
     valueFiles:
       - ../../environments/core/zulip/values.yaml
 
-  - name: immich
-    namespace: default
-    path: charts/immich/0.10.3
-    valueFiles:
-      - ../../../environments/core/immich/values.yaml
-
   - name: docker-registry
     namespace: default
     path: charts/core
