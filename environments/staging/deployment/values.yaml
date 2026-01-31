@@ -39,3 +39,9 @@ apps:
     path: charts/n8n/2.0.1
     valueFiles:
       - ../../../environments/staging/n8n/values.yaml
+
+  - name: staging-akxr-backend
+    namespace: default
+    path: charts/staging
+    valueFiles:
+      - ../../environments/staging/akxr-backend/values.yaml
