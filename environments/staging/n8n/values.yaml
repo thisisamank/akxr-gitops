@@ -40,12 +40,6 @@ main:
     # Webhook URL for external triggers (Telegram, etc.)
     WEBHOOK_URL:
       value: "https://n8n-staging.akxr.in"
-    # Telegram Bot Token for HTTP requests
-    TELEGRAM_BOT_TOKEN:
-      valueFrom:
-        secretKeyRef:
-          name: n8n-staging-secret
-          key: TELEGRAM_BOT_TOKEN
     # SMTP Configuration (Brevo)
     N8N_EMAIL_MODE:
       value: "smtp"
