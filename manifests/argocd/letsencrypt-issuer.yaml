@@ -13,3 +13,14 @@ spec:
     - http01:
         ingress:
           class: traefik
+          podTemplate:
+            spec:
+              tolerations:
+              - key: node
+                operator: Equal
+                value: prod
+                effect: NoSchedule
+              - key: node
+                operator: Equal
+                value: staging
+                effect: NoSchedule
