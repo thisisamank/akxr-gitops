@@ -1,0 +1,133 @@
+
+replicaCount: 1
+
+image:
+  repository: registry.pixr.in/akxr-backend
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: registry-pull-secret
+
+fullnameOverride: "akxr-backend-staging"
+
+serviceAccount:
+  create: true
+  automount: true
+
+podAnnotations:
+  description: "akxr-backend staging deployment"
+
+podLabels:
+  app: akxr-backend
+  environment: staging
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: api-staging.akxr.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls-prod
+      hosts:
+        - api-staging.akxr.in
+
+env:
+  - name: PORT
+    value: "3000"
+  - name: NODE_ENV
+    value: "production"
+  - name: DB_HOST
+    value: "staging-postgresql.postgres.svc.cluster.local"
+  - name: DB_PORT
+    value: "5432"
+  - name: DB_NAME
+    value: "akxr-staging"
+  - name: DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: DB_USERNAME
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: DB_PASSWORD
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: JWT_SECRET
+  - name: JWT_REFRESH_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: JWT_REFRESH_SECRET
+  - name: GITHUB_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: GITHUB_CLIENT_ID
+  - name: GITHUB_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: GITHUB_CLIENT_SECRET
+  - name: GITHUB_REDIRECT_URI
+    value: "https://api-staging.akxr.in/user/github/callback"
+  - name: FRONTEND_URL
+    value: "https://staging.akxr.in"
+  - name: REALTIME_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: REALTIME_API_KEY
+  - name: REALTIME_APP_ID
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: REALTIME_APP_ID
+  - name: CLOUDFLARE_ACCOUNT_ID
+    valueFrom:
+      secretKeyRef:
+        name: akxr-backend-secret-staging
+        key: CLOUDFLARE_ACCOUNT_ID
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe: {}
+  # httpGet:
+  #   path: /health
+  #   port: http
+  # initialDelaySeconds: 30
+  # periodSeconds: 10
+  # timeoutSeconds: 5
+  # failureThreshold: 3
+
+readinessProbe: {}
+  # httpGet:
+  #   path: /health
+  #   port: http
+  # initialDelaySeconds: 10
+  # periodSeconds: 5
+  # timeoutSeconds: 3
+  # failureThreshold: 3
+
+autoscaling:
+  enabled: false
+
