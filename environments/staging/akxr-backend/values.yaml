@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: registry.pixr.in/akxr-backend
   pullPolicy: Always
-  tag: "fae3883"
+  tag: "a2b85c8"
 
 imagePullSecrets:
   - name: registry-pull-secret
