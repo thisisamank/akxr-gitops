@@ -45,7 +45,7 @@ env:
   - name: PORT
     value: "3000"
   - name: NODE_ENV
-    value: "production"
+    value: "staging"
   - name: DB_HOST
     value: "staging-postgresql.postgres.svc.cluster.local"
   - name: DB_PORT
